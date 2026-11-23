@@ -1,0 +1,153 @@
+/* Utilidades de motion del sistema v2 (Lenis, fondo noche, vuelo al carrito).
+   Se importa desde main.jsx después de styles.css. Solo transform/opacity en animaciones. */
+
+/* Lenis controla el scroll: el smooth nativo de styles.css lo haría doble */
+html.lenis,
+html.lenis body {
+  scroll-behavior: auto !important;
+}
+
+/* Destino de ancla enfocado por código: sin anillo sobre la sección entera */
+[data-anchor-focus]:focus {
+  outline: none;
+}
+
+/* ---------- Fondo noche: aurora + grano ---------- */
+
+.night-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  /* Degradado radial en vez de blur: suave por naturaleza y barato de componer */
+  background: radial-gradient(closest-side, var(--blob-color) 0%, transparent 100%);
+}
+
+.aurora-blob--a {
+  --blob-color: rgb(110 231 183 / 0.22);
+  width: 62vmax;
+  height: 46vmax;
+  top: -18vmax;
+  right: -14vmax;
+  animation: aurora-a 26s ease-in-out infinite alternate;
+}
+
+.aurora-blob--b {
+  --blob-color: rgb(52 211 153 / 0.16);
+  width: 54vmax;
+  height: 40vmax;
+  bottom: -20vmax;
+  left: -16vmax;
+  animation: aurora-b 32s ease-in-out infinite alternate;
+}
+
+.aurora-blob--c {
+  --blob-color: rgb(30 91 67 / 0.55);
+  width: 48vmax;
+  height: 48vmax;
+  top: 20%;
+  left: 30%;
+  animation: aurora-c 38s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: translate3d(-12vmax, 8vmax, 0) scale(1.15);
+    opacity: 0.6;
+  }
+}
+
+@keyframes aurora-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+    opacity: 0.7;
+  }
+  to {
+    transform: translate3d(14vmax, -6vmax, 0) scale(0.95);
+    opacity: 1;
+  }
+}
+
+@keyframes aurora-c {
+  from {
+    transform: translate3d(-6vmax, -4vmax, 0) scale(0.9);
+  }
+  to {
+    transform: translate3d(8vmax, 6vmax, 0) scale(1.1);
+  }
+}
+
+/* Fuera de pantalla (NightBackdrop con IntersectionObserver): la aurora se detiene */
+.night-backdrop.is-paused .aurora-blob {
+  animation-play-state: paused;
+}
+
+/* Grano: ruido SVG local (data URI, permitido por img-src 'self' data:).
+   Sin mix-blend-mode: a esta opacidad se ve igual y no obliga a recomponer el fondo */
+.night-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+
+/* Fundidos: la aurora se apaga hacia noche plana en el borde, así no hay costura con la
+   sección vecina (bg-night). Color fijo: el hero no está dentro de .theme-night */
+.night-fade-bottom,
+.night-fade-top {
+  position: absolute;
+  inset-inline: 0;
+  height: 10rem;
+  pointer-events: none;
+}
+
+.night-fade-bottom {
+  bottom: 0;
+  background: linear-gradient(to bottom, rgb(10 22 17 / 0) 0%, var(--color-night) 100%);
+}
+
+.night-fade-top {
+  top: 0;
+  background: linear-gradient(to top, rgb(10 22 17 / 0) 0%, var(--color-night) 100%);
+}
+
+/* ---------- Vuelo al carrito ---------- */
+
+.fly-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.fly-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--color-mint, #6ee7b7);
+  box-shadow:
+    0 0 0 3px rgb(110 231 183 / 0.25),
+    0 6px 16px rgb(10 22 17 / 0.35);
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none;
+  }
+}
