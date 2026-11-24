@@ -20,7 +20,7 @@ export const site = {
     // Imagen 1200x630 en public/
     ogImage: '/og.png',
     locale: 'es_CL',
-    themeColor: '#0A1611',
+    themeColor: '#F7FAF6',
     priceRange: '$$',
   },
 
@@ -61,7 +61,6 @@ export const site = {
     '2027-01-01', '2027-05-01', '2027-05-21', '2027-07-16', '2027-08-15', '2027-09-18',
     '2027-09-19', '2027-11-01', '2027-12-08', '2027-12-25',
   ],
-  emergency: 'Urgencias por teléfono 24 h',
 
   delivery: 'Despacho en el día dentro de la comuna',
   pickup: 'Retiro en tienda sin costo',
@@ -69,12 +68,5 @@ export const site = {
   // muestra: reemplazar con datos reales
   socials: [
     { label: 'Instagram', handle: '@vallevet', href: 'https://www.instagram.com/vallevet' },
-  ],
-
-  nav: [
-    { label: 'Tienda', href: '#tienda' },
-    { label: 'Servicios', href: '#servicios' },
-    { label: 'Cómo agendar', href: '#como-agendar' },
-    { label: 'Contacto', href: '#contacto' },
   ],
 }

@@ -1,10 +1,12 @@
 // Equipo veterinario. Sin fotos: el avatar ilustrado usa las iniciales (components/decor/VetAvatar.jsx).
+// id: se usa en /agendar?vet=<id> para precargar el motivo.
 // shortName: cómo se nombra en los botones ("Agendar con Paula").
 // muestra: reemplazar con datos reales (nombres, iniciales, turnos, especialidades y años)
 
 export const team = [
   {
     // muestra: reemplazar con datos reales
+    id: 'paula',
     name: 'Dra. Paula Rojas',
     shortName: 'Paula',
     initials: 'PR',
@@ -15,6 +17,7 @@ export const team = [
   },
   {
     // muestra: reemplazar con datos reales
+    id: 'tomas',
     name: 'Dr. Tomás Fuentes',
     shortName: 'Tomás',
     initials: 'TF',
@@ -25,6 +28,7 @@ export const team = [
   },
   {
     // muestra: reemplazar con datos reales
+    id: 'camila',
     name: 'Dra. Camila Soto',
     shortName: 'Camila',
     initials: 'CS',
@@ -34,3 +38,7 @@ export const team = [
     years: 7,
   },
 ]
+
+export function getVet(id) {
+  return team.find((v) => v.id === id)
+}

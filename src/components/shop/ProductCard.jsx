@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { Check, Plus } from 'lucide-react'
 import ProductPackage from './ProductPackage.jsx'
 import QuantityStepper from './QuantityStepper.jsx'
@@ -7,6 +8,7 @@ import Icon from '../ui/Icon.jsx'
 import Button from '../ui/Button.jsx'
 import { useCart } from '../../context/cart.js'
 import { pointerMotionOk } from '../../lib/motionOk.js'
+import { productPath } from '../../data/navigation.js'
 
 // Inclinación máxima de la tarjeta al seguir el cursor, en grados (contrato: ≤ 8)
 const MAX_TILT = 6
@@ -79,7 +81,12 @@ function TiltArticle({ className = '', children }) {
   )
 }
 
-export default function ProductCard({ product }) {
+// headingLevel: nivel del nombre (3 por defecto; 2 si la página no tiene h2 antes de la grilla).
+// El nombre enlaza al detalle (/tienda/<slug>); la vitrina también, fuera del orden de Tab
+// (mismo destino que el nombre, así el teclado no pasa dos veces por el mismo enlace).
+export default function ProductCard({ product, headingLevel = 3 }) {
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
+  const href = productPath(product)
   const { qtyOf, add } = useCart()
   const inCart = qtyOf(product.id) > 0
   const actionRef = useRef(null)
@@ -105,22 +112,27 @@ export default function ProductCard({ product }) {
   }, [inCart])
 
   return (
-    <TiltArticle className="theme-night flex w-full gap-3 rounded-card border border-night-line bg-night-raised p-2 text-on-night sm:flex-col sm:gap-0">
-      {/* Vitrina: radio interior = 16 − 8. En móvil va a la izquierda y la tarjeta queda horizontal */}
-      <div className="vitrine-night relative flex w-32 shrink-0 items-start rounded-[8px] px-2 pb-2 pt-4 sm:block sm:w-auto sm:px-6 sm:pb-2 sm:pt-8">
-        <ProductPackage product={product} tone="night" className="mx-auto block h-auto w-full max-w-[240px] overflow-visible" />
-        <PriceTag price={product.price} size="md" className="theme-light tag-swing absolute right-2 top-2 -rotate-6 max-sm:hidden" />
+    <TiltArticle className="flex w-full gap-3 rounded-card border border-line bg-card p-2 text-ink sm:flex-col sm:gap-0">
+      {/* Vitrina: radio interior = 16 − 8. En móvil va a la izquierda y la tarjeta queda horizontal.
+          Fondo con el color de la categoría (styles.css: .vitrine--<categoría>) */}
+      <div className={`vitrine vitrine--${product.category} relative flex w-32 shrink-0 items-start rounded-[8px] px-2 pb-2 pt-4 sm:block sm:w-auto sm:px-6 sm:pb-2 sm:pt-8`}>
+        <Link to={href} tabIndex={-1} aria-hidden="true" className="block">
+          <ProductPackage product={product} className="mx-auto block h-auto w-full max-w-[240px] overflow-visible" />
+        </Link>
+        <PriceTag price={product.price} size="md" className="tag-swing absolute right-2 top-2 -rotate-6 max-sm:hidden" />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col py-2 pr-2 sm:px-3 sm:pb-3 sm:pt-4">
         <p className="text-[13px] leading-5 text-muted">
           {product.brand} · {product.species}
         </p>
-        <h3 className="mt-1 text-[16px] font-medium leading-[1.3] text-ink">
-          {product.name} <span className="whitespace-nowrap text-ink-soft">{product.size}</span>
-        </h3>
+        <Heading className="mt-1 text-[16px] font-medium leading-[1.3] text-ink">
+          <Link to={href} className="product-link rounded-[4px] underline-offset-4 hover:underline">
+            {product.name} <span className="whitespace-nowrap text-ink-soft">{product.size}</span>
+          </Link>
+        </Heading>
         <p className="mt-1 text-[14px] leading-5 text-ink-soft">{product.detail}</p>
-        <PriceTag price={product.price} size="sm" className="theme-light tag-swing -ml-1 mt-2 -rotate-6 sm:hidden" />
+        <PriceTag price={product.price} size="sm" className="tag-swing -ml-1 mt-2 -rotate-6 sm:hidden" />
 
         <div
           ref={actionRef}
@@ -134,7 +146,7 @@ export default function ProductCard({ product }) {
         >
           {inCart ? (
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-              <span className="inline-flex items-center gap-2 text-[14px] font-medium text-mint">
+              <span className="inline-flex items-center gap-2 text-[14px] font-medium text-brand">
                 <Icon icon={Check} />
                 En el carrito
               </span>

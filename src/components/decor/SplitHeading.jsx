@@ -9,8 +9,12 @@ const SIZES = {
 
 // Encabezado de sección grande con entrada por líneas (SplitText con máscara).
 // eyebrow: texto corto sobre el título. lede: bajada. children: acciones bajo la bajada.
-// Con prefers-reduced-motion se muestra estático. El id va en el <h2> (aria-labelledby).
+// Con prefers-reduced-motion se muestra estático. El id va en el encabezado (aria-labelledby).
+// as: nivel del encabezado ('h2' por defecto; 'h1' en el encabezado de una página interior).
+// Colores por token (text-ink / text-ink-soft): funciona en page, card y en todas las .band-* soft.
+// Dentro de .band-brand pasa a blanco / leaf-soft solo.
 export default function SplitHeading({
+  as: Heading = 'h2',
   id,
   eyebrow,
   title,
@@ -26,7 +30,7 @@ export default function SplitHeading({
   useGSAP(
     () => {
       const root = ref.current
-      const heading = root?.querySelector('h2')
+      const heading = root?.querySelector('[data-split-heading]')
       if (!heading) return
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -76,15 +80,16 @@ export default function SplitHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h2
+      <Heading
         id={id}
+        data-split-heading=""
         tabIndex={focusable ? -1 : undefined}
-        className={`heading-display mt-4 text-on-night focus:outline-none ${SIZES[size] || SIZES.lg}`}
+        className={`heading-display mt-4 text-ink in-[.band-brand]:text-white ${SIZES[size] || SIZES.lg}`}
       >
         {title}
-      </h2>
+      </Heading>
       {lede ? (
-        <p data-fade className="mt-5 text-[17px] leading-[1.65] text-on-night-soft sm:text-[18px]">
+        <p data-fade className="mt-5 text-[17px] leading-[1.65] text-ink-soft in-[.band-brand]:text-leaf-soft sm:text-[18px]">
           {lede}
         </p>
       ) : null}

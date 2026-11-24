@@ -16,7 +16,7 @@ function FaqItem({ item, open, onToggle }) {
   const panelId = `${id}-panel`
 
   return (
-    <li className={`faq-item rounded-[20px] border transition-colors ${open ? 'is-open border-mint/25' : 'border-night-line'}`}>
+    <li className={`faq-item rounded-[20px] border transition-colors ${open ? 'is-open border-brand/30' : 'border-line'}`}>
       <h3>
         <button
           id={buttonId}
@@ -24,14 +24,14 @@ function FaqItem({ item, open, onToggle }) {
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="group flex min-h-16 w-full items-center justify-between gap-6 px-5 py-4 text-left text-[17px] font-medium leading-6 text-on-night transition-colors hover:text-mint sm:px-6"
+          className="group flex min-h-16 w-full items-center justify-between gap-6 px-5 py-4 text-left text-[17px] font-medium leading-6 text-ink transition-colors hover:text-brand-hover sm:px-6"
         >
           {item.q}
           <span
             className={`flex size-9 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,color,rotate] duration-300 ${
               open
-                ? 'rotate-45 border-mint bg-mint text-night'
-                : 'border-line-strong text-on-night-soft group-hover:border-mint group-hover:text-mint'
+                ? 'rotate-45 border-brand bg-brand text-white'
+                : 'border-line-strong bg-card text-ink-soft group-hover:border-brand group-hover:text-brand-hover'
             }`}
             aria-hidden="true"
           >
@@ -43,7 +43,7 @@ function FaqItem({ item, open, onToggle }) {
           visibility hidden, fuera del árbol de accesibilidad como con hidden. */}
       <div id={panelId} role="region" aria-labelledby={buttonId} data-open={open} className="faq-panel">
         <div>
-          <p className="max-w-[40rem] px-5 pb-6 text-[16px] leading-[1.65] text-on-night-soft sm:px-6">{item.a}</p>
+          <p className="max-w-[40rem] px-5 pb-6 text-[16px] leading-[1.65] text-ink-soft sm:px-6">{item.a}</p>
         </div>
       </div>
     </li>
@@ -51,40 +51,47 @@ function FaqItem({ item, open, onToggle }) {
 }
 
 // Preguntas frecuentes: a la izquierda el título fijo (sticky) y una tarjeta CTA de
-// WhatsApp; a la derecha el acordeón con indicador mint en la pregunta abierta.
-export default function Faq() {
+// WhatsApp; a la derecha el acordeón con indicador brand en la pregunta abierta.
+// Props: id (ancla, "faq" en Nosotros: /nosotros#faq), items (lista a mostrar; por defecto todas),
+// title (título alternativo), band (fondo de la sección, clase .band-*; page por defecto).
+export default function Faq({ id = 'faq', items = faq, title, band = 'page' }) {
   const [openIndex, setOpenIndex] = useState(0)
+  const titleId = `${id}-title`
+
+  if (!items.length) return null
 
   return (
-    <section id="preguntas" aria-labelledby="faq-title" className="theme-night relative isolate overflow-clip py-24 lg:py-32">
-      <SectionBackdrop glows="b" pattern="grid" />
+    <section id={id} aria-labelledby={titleId} className={`band-${band} relative isolate overflow-clip py-24 lg:py-32`}>
+      <SectionBackdrop glows="b" pattern="none" />
       <Container className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-16">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <SplitHeading
-            id="faq-title"
+            id={titleId}
             eyebrow="Preguntas frecuentes"
             size="md"
             title={
-              <>
-                Respuestas <span className="text-glow">antes de venir</span>
-              </>
+              title || (
+                <>
+                  Respuestas <span className="text-highlight">antes de venir</span>
+                </>
+              )
             }
           />
-          <Reveal className="cta-card mt-8 rounded-[28px] border border-mint/20 p-6 sm:p-7">
-            <span className="flex size-12 items-center justify-center rounded-2xl bg-mint text-night" aria-hidden="true">
+          <Reveal className="cta-card mt-8 rounded-[28px] border border-line p-6 sm:p-7">
+            <span className="flex size-12 items-center justify-center rounded-2xl bg-leaf text-ink" aria-hidden="true">
               <MessageCircle size={22} strokeWidth={1.75} />
             </span>
-            <p className="mt-5 text-[22px] font-medium leading-tight tracking-[-0.01em] text-on-night">¿Otra duda?</p>
-            <p className="mt-2 text-[15px] leading-6 text-on-night-soft">
+            <p className="mt-5 text-[22px] font-medium leading-tight tracking-[-0.01em] text-ink">¿Otra duda?</p>
+            <p className="mt-2 text-[15px] leading-6 text-ink-soft">
               Escríbenos por WhatsApp y te responde una persona del equipo, no un bot.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button href={questionUrl} external variant="night-primary">
+              <Button href={questionUrl} external variant="primary">
                 <Icon icon={MessageCircle} />
                 Escribir por WhatsApp
                 <span className="sr-only"> (se abre en otra pestaña)</span>
               </Button>
-              <Button href={site.phone.href} variant="night-secondary">
+              <Button href={site.phone.href} variant="secondary">
                 <Icon icon={Phone} />
                 Llamar
                 <span className="sr-only">: {site.phone.display}</span>
@@ -94,7 +101,7 @@ export default function Faq() {
         </div>
 
         <Reveal as="ul" stagger={0.06} className="space-y-3">
-          {faq.map((item, i) => (
+          {items.map((item, i) => (
             <FaqItem
               key={item.q}
               item={item}

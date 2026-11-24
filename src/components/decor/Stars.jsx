@@ -4,6 +4,8 @@ const STAR = 'M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9
 
 // Fila de 5 estrellas con relleno parcial (4,9 = cuatro llenas y casi la quinta).
 // label: texto para lectores de pantalla; sin label es decorativa.
+// Relleno sun con canto ámbar (para que se lea sobre blanco). La base vacía usa el color
+// de texto heredado (currentColor) al 14 %.
 export default function Stars({ value = 5, size = 16, label, className = '' }) {
   const id = useId().replace(/:/g, '')
   // Cada estrella ocupa x 2,5–21,5 de su celda de 26: el recorte cubre las estrellas
@@ -26,16 +28,25 @@ export default function Stars({ value = 5, size = 16, label, className = '' }) {
           <rect x="0" y="0" width={clipWidth} height="24" />
         </clipPath>
         <linearGradient id={`grad-${id}`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stopColor="#FDE68A" />
+          <stop offset="0" stopColor="#FFD15C" />
           <stop offset="1" stopColor="#F5B544" />
         </linearGradient>
       </defs>
       {[0, 1, 2, 3, 4].map((i) => (
-        <path key={`b${i}`} d={STAR} transform={`translate(${i * 26} 0)`} fill="rgb(234 242 236 / 0.16)" />
+        <path key={`b${i}`} d={STAR} transform={`translate(${i * 26} 0)`} fill="currentColor" fillOpacity="0.14" />
       ))}
       <g clipPath={`url(#clip-${id})`}>
         {[0, 1, 2, 3, 4].map((i) => (
-          <path key={`f${i}`} d={STAR} transform={`translate(${i * 26} 0)`} fill={`url(#grad-${id})`} />
+          <path
+            key={`f${i}`}
+            d={STAR}
+            transform={`translate(${i * 26} 0)`}
+            fill={`url(#grad-${id})`}
+            stroke="#B7791F"
+            strokeOpacity="0.55"
+            strokeWidth="0.8"
+            strokeLinejoin="round"
+          />
         ))}
       </g>
     </svg>

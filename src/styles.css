@@ -1,34 +1,72 @@
 @import "tailwindcss";
 
-/* Tokens de Valle Vet. Fuente: docs/DESIGN_DIRECTION.md */
+/* =====================================================================
+   Valle Vet — sistema visual v4 "día" (claro y vivo). Contrato: docs/DESIGN_DIRECTION.md
+
+   TEMA ÚNICO: claro (body = bg page + texto ink). El tema noche de v2/v3 se retiró en la
+   Fase B de v4: no hay tokens ni clases noche. Variables de banda: cada .band-* define
+   --band-bg (su color de fondo) para piezas que deben "recortar" sobre la banda.
+
+   Contraste AA verificado (texto / fondo):
+     ink        sobre page 15.4 · card 16.2 · raised 14.5 · bandas soft ≥ 13.7
+     ink-soft   sobre page 7.6  · card 8.0  · raised 7.2  · bandas soft ≥ 6.8
+     muted      sobre page 5.4  · card 5.7  · raised 5.1  · bandas soft ≥ 4.8
+     brand      sobre page 5.1  · card 5.4  · raised 4.8  · bandas soft ≥ 4.6 (enlaces)
+     blanco     sobre brand 5.4 · brand-hover 7.5 · leaf-soft sobre brand 4.9
+     ink        sobre leaf 7.1  · coral 5.8 · sky 7.6 · sun 11.2
+     Prohibido: texto coral/sky/sun/leaf sobre claro; ink-soft o muted sobre leaf/coral/sky.
+
+   CLASES SEMÁNTICAS (Fase B: úsalas en todas las páginas)
+   Bandas de sección (fondo + contexto). Alternar page / white / una soft; máx. 1 brand por página:
+     .band-page    fondo page (base)              .band-white   fondo card (blanco)
+     .band-raised  fondo raised (alterna neutra)  .band-leaf    leaf-soft (tienda, salud)
+     .band-sky     sky-soft (servicios, info)     .band-sun     sun-soft (destacados, opiniones)
+     .band-coral   coral-soft (ofertas, urgencias)
+     .band-brand   verde brand saturado, texto blanco. Dentro: text-white / text-leaf-soft,
+                   Button variant="inverse". El anillo de foco pasa a blanco solo.
+   Hero y encabezados:
+     .hero-sky     degradado suave leaf-soft → sky-soft → page (hero de Inicio y PageHero)
+     .hero-leaf / .hero-sun / .hero-coral   variantes del mismo degradado por tono
+     <DayBackdrop/> (motion/DayBackdrop.jsx) formas orgánicas suaves animadas sobre el hero
+   Patrones finos (capa absoluta, aria-hidden, encima del fondo, debajo del contenido):
+     .pattern-dots   puntos ink al 7 %       .pattern-paws   huellas ink al 5 %
+   Superficies:
+     .surface-card   tarjeta blanca con hairline y sombra suave
+   Tienda: .vitrine + .vitrine--<categoría> (alimento, antiparasitarios, higiene, accesorios),
+     .shop-toolbar, .shop-empty, .product-vitrine (detalle), .product-link
+   Otras: .urgent-card (urgencias), .map-card (mapa), .cta-band (banda final),
+     .nav-link / .mobile-nav-link con .is-active (ruta actual: barra + peso, no solo color)
+     .text-highlight palabra destacada: texto brand con subrayado marcador sun-soft
+   ===================================================================== */
+
+/* Tokens de Valle Vet. Fuente: docs/DESIGN_DIRECTION.md (v4) */
 @theme {
   --font-sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* Neutros cálidos con tinte verde */
-  --color-page: #f6f7f4;
+  /* v4 día: neutros con tinte verde muy leve */
+  --color-page: #f7faf6;
   --color-card: #ffffff;
-  --color-raised: #ecefea;
-  --color-ink: #16201b;
-  --color-ink-soft: #4a5550;
-  --color-muted: #5c665f;
-  --color-line: rgb(22 32 27 / 0.08);
-  --color-line-strong: rgb(22 32 27 / 0.16);
+  --color-raised: #eef4ef;
+  --color-ink: #13241c;
+  --color-ink-soft: #44544b;
+  --color-muted: #5b6a61;
+  --color-line: rgb(19 36 28 / 0.1);
+  --color-line-strong: rgb(19 36 28 / 0.18);
 
-  /* Acento pino */
-  --color-pine: #1e5b43;
-  --color-pine-hover: #174a36;
-  --color-pine-soft: #e3ece6;
+  /* v4 día: verde principal (botones primarios, enlaces) */
+  --color-brand: #0f7a47;
+  --color-brand-hover: #0b6239;
 
-  /* Noche (v2): hero y tienda. Nombres exactos del contrato en DESIGN_DIRECTION.md */
-  --color-night: #0a1611;
-  --color-night-raised: #11231b;
-  --color-night-line: rgba(234, 242, 236, 0.1);
-  --color-on-night: #eef5f0;
-  --color-on-night-soft: #a7bbaf;
-  /* Acento en oscuro: glows y foco. Texto sobre mint siempre en --color-night */
-  --color-mint: #6ee7b7;
-  --color-mint-deep: #34d399;
+  /* v4 día: acentos vivos (rellenos, ilustración; texto ink encima) + sus fondos suaves */
+  --color-leaf: #22c55e;
+  --color-leaf-soft: #dcfce7;
+  --color-coral: #ff6b4a;
+  --color-coral-soft: #ffe7e0;
+  --color-sky: #38bdf8;
+  --color-sky-soft: #e0f2fe;
+  --color-sun: #ffd15c;
+  --color-sun-soft: #fff6d6;
 
   /* Semánticos */
   --color-negative: #dc2626;
@@ -40,14 +78,18 @@
   --radius-card: 16px;
   --radius-panel: 20px;
 
-  /* Profundidad: capas suaves (contacto + ambiente) */
-  --shadow-soft: 0 1px 2px rgb(22 32 27 / 0.05);
-  --shadow-float: 0 8px 24px rgb(22 32 27 / 0.07);
-  --shadow-lift: 0 1px 2px rgb(22 32 27 / 0.06), 0 8px 16px -6px rgb(22 32 27 / 0.1),
-    0 24px 48px -16px rgb(22 32 27 / 0.16);
-  --shadow-night: 0 1px 0 rgb(234 242 236 / 0.06) inset, 0 18px 40px -16px rgb(0 0 0 / 0.65);
-  --shadow-night-lift: 0 1px 0 rgb(234 242 236 / 0.08) inset, 0 30px 60px -20px rgb(0 0 0 / 0.8),
-    0 0 0 1px rgb(110 231 183 / 0.18);
+  /* Profundidad: sombras neutras con tinte verde (contacto + ambiente), sin glows */
+  --shadow-soft: 0 1px 2px rgb(19 36 28 / 0.06);
+  --shadow-card: 0 1px 2px rgb(19 36 28 / 0.05), 0 10px 24px -14px rgb(19 50 34 / 0.18);
+  --shadow-float: 0 1px 2px rgb(19 36 28 / 0.05), 0 12px 32px -12px rgb(19 50 34 / 0.2);
+  --shadow-lift: 0 1px 2px rgb(19 36 28 / 0.06), 0 10px 20px -8px rgb(19 50 34 / 0.14),
+    0 28px 52px -18px rgb(19 50 34 / 0.24);
+  /* Barra inferior móvil: sombra hacia arriba */
+  --shadow-bar: 0 -1px 0 rgb(19 36 28 / 0.06), 0 -10px 28px -14px rgb(19 50 34 / 0.22);
+  /* Sombras de figura (filter: drop-shadow) para SVG recortados: empaques, chapita, precio */
+  --drop-shadow-pack: 0 8px 10px rgb(19 50 34 / 0.16);
+  --drop-shadow-chapita: 0 24px 32px rgb(15 61 39 / 0.22);
+  --drop-shadow-tag: 0 4px 6px rgb(19 50 34 / 0.14);
 
   /* Motion: curva base + resorte suave para hovers */
   --ease-vet: cubic-bezier(0.22, 1, 0.36, 1);
@@ -128,75 +170,39 @@
     }
   }
 
-  /* v3: toda la página es noche; el fondo base evita costuras claras entre secciones */
+  /* v4: tema claro por defecto */
   body {
-    background-color: var(--color-night);
-    color: var(--color-on-night);
+    background-color: var(--color-page);
+    color: var(--color-ink);
+    color-scheme: light;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
-    background-color: var(--color-pine-soft);
+    background-color: var(--color-sun);
     color: var(--color-ink);
   }
 
-  /* Toda la página es noche: anillo mint (12:1 sobre night). Dentro de .theme-light
-     (carrito) el anillo vuelve a pino: ver la regla de .theme-light más abajo. */
+  /* Foco: anillo brand 2 px con offset (≥ 4.5:1 sobre page, card, raised y todas las bandas soft).
+     En .band-brand pasa a blanco. */
   :focus-visible {
-    outline: 2px solid var(--color-mint);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+
+  .band-brand :focus-visible,
+  .band-brand:focus-visible {
+    outline-color: var(--color-card);
   }
 
   /* El offset del header fijo vive en scroll-padding-top del html (sumar scroll-margin aquí lo duplicaría) */
 
-  /* Tema noche por contexto: reasigna los tokens neutros y el acento.
-     Todo lo que use bg-card, text-ink, border-line, bg-pine, etc. dentro de
-     .theme-night se ve bien en oscuro sin tocar el componente.
-     Contraste: on-night sobre night 16:1, on-night-soft 8:1, mint 12:1. */
-  .theme-night {
-    --color-page: var(--color-night);
-    --color-card: var(--color-night-raised);
-    --color-raised: rgb(234 242 236 / 0.07);
-    --color-ink: var(--color-on-night);
-    --color-ink-soft: var(--color-on-night-soft);
-    --color-muted: var(--color-on-night-soft);
-    --color-line: var(--color-night-line);
-    --color-line-strong: rgb(234 242 236 / 0.2);
-    --color-pine: var(--color-mint);
-    --color-pine-hover: var(--color-mint-deep);
-    --color-pine-soft: rgb(110 231 183 / 0.14);
-    --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-float: var(--shadow-night);
-    --shadow-lift: var(--shadow-night-lift);
-    /* Rojo de error más claro: 6:1 sobre night-raised (el #dc2626 daba 4:1) */
-    --color-negative: #f87171;
-    color: var(--color-ink);
-    color-scheme: dark;
-  }
-
-  /* Vuelta al tema claro dentro de una zona noche (p. ej. la chapita de precio, que es blanca) */
-  .theme-light {
-    --color-page: #f6f7f4;
-    --color-card: #ffffff;
-    --color-raised: #ecefea;
-    --color-ink: #16201b;
-    --color-ink-soft: #4a5550;
-    --color-muted: #5c665f;
-    --color-line: rgb(22 32 27 / 0.08);
-    --color-line-strong: rgb(22 32 27 / 0.16);
-    --color-pine: #1e5b43;
-    --color-pine-hover: #174a36;
-    --color-pine-soft: #e3ece6;
-    --color-negative: #dc2626;
-    color: var(--color-ink);
-    color-scheme: light;
-  }
-
-  /* Sobre fondo claro (carrito) el anillo mint no se ve: vuelve a pino (7:1 sobre blanco) */
-  .theme-light :focus-visible {
-    outline-color: var(--color-pine);
+  /* Títulos y destinos con foco programático (h1 al cambiar de ruta, tabindex=-1): sin anillo
+     si el foco no viene del teclado. Siguen siendo accesibles para el lector de pantalla. */
+  [tabindex="-1"]:focus:not(:focus-visible) {
+    outline: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -217,12 +223,6 @@
       transition-delay: 0s !important;
     }
   }
-}
-
-/* En noche, bg-pine pasa a mint: su texto debe ser oscuro (text-white daría 1.6:1).
-   Fuera de capa para ganarle a la utilidad text-white. */
-.theme-night .bg-pine {
-  color: var(--color-night);
 }
 
 @layer components {
@@ -285,13 +285,15 @@
     }
   }
 
-  /* ---------- Tarjeta de producto en noche (ProductCard.jsx) ---------- */
+  /* ---------- Tarjeta de producto con tilt (ProductCard.jsx) ---------- */
   .tilt-card {
+    --spot-a: rgb(34 197 94 / 0.14);
+    --spot-b: rgb(56 189 248 / 0.05);
     position: relative;
     transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
       translate3d(0, var(--lift, 0px), 0);
     transition: transform 520ms var(--ease-vet), border-color 260ms var(--ease-vet);
-    box-shadow: var(--shadow-night);
+    box-shadow: var(--shadow-card);
   }
 
   /* Sombra elevada en capa aparte: se anima solo la opacidad */
@@ -301,7 +303,7 @@
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    box-shadow: var(--shadow-night-lift);
+    box-shadow: var(--shadow-lift);
     opacity: 0;
     transition: opacity 320ms var(--ease-vet);
     pointer-events: none;
@@ -329,18 +331,16 @@
     height: 360px;
     margin: -180px 0 0 -180px;
     border-radius: 9999px;
-    background: radial-gradient(closest-side, rgb(110 231 183 / 0.16), rgb(110 231 183 / 0.05) 55%, transparent);
+    background: radial-gradient(closest-side, var(--spot-a), var(--spot-b) 55%, transparent);
     transform: translate3d(var(--lx, 50%), var(--ly, 0px), 0);
     opacity: 0;
     transition: opacity 320ms var(--ease-vet);
   }
 
-  /* Vitrina: luz mint desde abajo, como una repisa iluminada */
-  .vitrine-night {
-    background:
-      radial-gradient(120% 80% at 50% 105%, rgb(110 231 183 / 0.16), transparent 62%),
-      linear-gradient(180deg, rgb(234 242 236 / 0.06), rgb(234 242 236 / 0.02));
-    box-shadow: inset 0 0 0 1px rgb(234 242 236 / 0.06);
+  /* Vitrina clara: repisa con luz de día (fondo del empaque en ProductCard, Fase B) */
+  .vitrine {
+    background: linear-gradient(180deg, var(--color-raised), var(--color-leaf-soft));
+    box-shadow: inset 0 0 0 1px var(--color-line);
   }
 
   /* Empaque (ProductPackage.jsx): cuerpo y sombra de apoyo por separado */
@@ -362,7 +362,7 @@
   @media (hover: hover) and (pointer: fine) {
     .tilt-card:hover {
       --lift: -6px;
-      border-color: rgb(110 231 183 / 0.28);
+      border-color: rgb(15 122 71 / 0.3);
       will-change: transform;
     }
 
@@ -399,7 +399,7 @@
     bottom: 8px;
     height: 2px;
     border-radius: 2px;
-    background: var(--color-pine);
+    background: var(--color-brand);
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 320ms var(--ease-vet);
@@ -429,7 +429,7 @@
   @media (hover: hover) and (pointer: fine) {
     .fx-group:hover .fx-icon {
       animation: nudge 620ms var(--ease-vet);
-      color: var(--color-pine);
+      color: var(--color-brand);
     }
 
     .fx-link:hover {
@@ -449,7 +449,7 @@
 
   @media (hover: hover) and (pointer: fine) {
     .fx-input:hover:not(:focus) {
-      background-color: var(--color-pine-soft);
+      background-color: var(--color-leaf-soft);
     }
   }
 
@@ -487,20 +487,16 @@
 
   /* Franja de datos flotante sobre el borde del hero */
   .info-float {
-    background:
-      linear-gradient(180deg, rgb(234 242 236 / 0.06), rgb(234 242 236 / 0.02)),
-      rgb(17 35 27 / 0.92);
+    background: rgb(255 255 255 / 0.96);
     box-shadow:
-      0 1px 0 rgb(234 242 236 / 0.08) inset,
-      0 30px 60px -24px rgb(0 0 0 / 0.7);
+      inset 0 0 0 1px var(--color-line),
+      var(--shadow-float);
   }
 
   /* Blur solo desde tablet: en móvil cuesta demasiado */
   @media (min-width: 768px) {
     .info-float {
-      background:
-        linear-gradient(180deg, rgb(234 242 236 / 0.06), rgb(234 242 236 / 0.02)),
-        rgb(17 35 27 / 0.82);
+      background: rgb(255 255 255 / 0.84);
       -webkit-backdrop-filter: blur(16px) saturate(140%);
       backdrop-filter: blur(16px) saturate(140%);
     }
@@ -508,7 +504,7 @@
 }
 
 /* =====================================================================
-   v3 — Mitad inferior en noche (InfoStrip → Footer)
+   Secciones (InfoStrip → Footer): tipografía, fondos, tarjetas y sus efectos
    Solo transform/opacity en animaciones. Hovers con transform solo con
    (hover: hover) and (pointer: fine). Con reduced-motion todo queda estático.
    ===================================================================== */
@@ -580,15 +576,21 @@
     line-height: 1;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-mint);
+    /* brand: ≥ 4.6:1 en page, card, raised y todas las bandas soft */
+    color: var(--color-brand);
   }
 
   .eyebrow::before {
     content: "";
     width: 22px;
-    height: 1px;
+    height: 2px;
+    border-radius: 2px;
     background: currentColor;
-    box-shadow: 0 0 10px rgb(110 231 183 / 0.8);
+  }
+
+  /* En .band-brand el eyebrow va en leaf-soft (4.9:1) */
+  .band-brand .eyebrow {
+    color: var(--color-leaf-soft);
   }
 
   .heading-display {
@@ -598,12 +600,22 @@
     text-wrap: balance;
   }
 
-  /* Palabras destacadas: degradado mint (el inicio claro mantiene el contraste) */
-  .text-glow {
-    background: linear-gradient(100deg, #eef5f0 0%, #a7f3d0 35%, #6ee7b7 65%, #34d399 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Palabras destacadas: texto brand con marcador sun-soft (brand sobre sun-soft 5:1).
+     En .band-sun el marcador pasa a leaf-soft (brand sobre leaf-soft 4.6:1) para que se vea. */
+  .text-highlight {
+    color: var(--color-brand);
+    background-image: linear-gradient(transparent 58%, var(--color-sun-soft) 58%, var(--color-sun-soft) 92%, transparent 92%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .band-sun .text-highlight {
+    background-image: linear-gradient(transparent 58%, var(--color-leaf-soft) 58%, var(--color-leaf-soft) 92%, transparent 92%);
+  }
+
+  .band-brand .text-highlight {
+    color: var(--color-card);
+    background-image: linear-gradient(transparent 62%, rgb(255 255 255 / 0.18) 62%, rgb(255 255 255 / 0.18) 92%, transparent 92%);
   }
 
   /* SplitText con máscara: un poco de aire para que no se corten los descendentes */
@@ -623,51 +635,51 @@
 
   .sb-band,
   .sb-glows,
-  .sb-pattern,
-  .sb-grain {
+  .sb-pattern {
     position: absolute;
     inset: 0;
   }
 
-  /* Franja elevada con bordes difuminados: sin cortes duros entre secciones */
+  /* Franja raised con bordes difuminados: sin cortes duros entre secciones */
   .sb-band {
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      var(--color-night-raised) 22%,
-      var(--color-night-raised) 78%,
+      var(--color-raised) 22%,
+      var(--color-raised) 78%,
       transparent 100%
     );
   }
 
+  /* Lavados pastel entre tonos soft vecinos (sin glow) */
   .sb-glows--a {
     background:
-      radial-gradient(40% 50% at 85% 15%, rgb(110 231 183 / 0.13), transparent 70%),
-      radial-gradient(45% 55% at 10% 90%, rgb(45 212 191 / 0.09), transparent 70%);
+      radial-gradient(40% 50% at 85% 15%, rgb(220 252 231 / 0.9), transparent 70%),
+      radial-gradient(45% 55% at 10% 90%, rgb(224 242 254 / 0.8), transparent 70%);
   }
 
   .sb-glows--b {
     background:
-      radial-gradient(50% 60% at 50% 0%, rgb(110 231 183 / 0.12), transparent 70%),
-      radial-gradient(30% 40% at 95% 80%, rgb(45 212 191 / 0.07), transparent 70%);
+      radial-gradient(50% 60% at 50% 0%, rgb(224 242 254 / 0.85), transparent 70%),
+      radial-gradient(30% 40% at 95% 80%, rgb(255 246 214 / 0.9), transparent 70%);
   }
 
   .sb-glows--c {
     background:
-      radial-gradient(40% 45% at 0% 10%, rgb(110 231 183 / 0.12), transparent 70%),
-      radial-gradient(45% 50% at 100% 70%, rgb(52 211 153 / 0.1), transparent 70%);
+      radial-gradient(40% 45% at 0% 10%, rgb(255 246 214 / 0.9), transparent 70%),
+      radial-gradient(45% 50% at 100% 70%, rgb(220 252 231 / 0.85), transparent 70%);
   }
 
   .sb-glows--d {
     background:
-      radial-gradient(45% 55% at 90% 45%, rgb(110 231 183 / 0.14), transparent 70%),
-      radial-gradient(35% 45% at 5% 95%, rgb(45 212 191 / 0.08), transparent 70%);
+      radial-gradient(45% 55% at 90% 45%, rgb(255 231 224 / 0.8), transparent 70%),
+      radial-gradient(35% 45% at 5% 95%, rgb(255 246 214 / 0.85), transparent 70%);
   }
 
   .sb-glows--e {
     background:
-      radial-gradient(60% 50% at 50% 100%, rgb(110 231 183 / 0.12), transparent 70%),
-      radial-gradient(30% 40% at 10% 20%, rgb(45 212 191 / 0.06), transparent 70%);
+      radial-gradient(60% 50% at 50% 100%, rgb(220 252 231 / 0.85), transparent 70%),
+      radial-gradient(30% 40% at 10% 20%, rgb(224 242 254 / 0.8), transparent 70%);
   }
 
   .sb-pattern {
@@ -677,53 +689,48 @@
 
   .sb-pattern--grid {
     background-image:
-      linear-gradient(rgb(234 242 236 / 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(234 242 236 / 0.045) 1px, transparent 1px);
+      linear-gradient(rgb(19 36 28 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(19 36 28 / 0.05) 1px, transparent 1px);
     background-size: 56px 56px;
   }
 
   .sb-pattern--dots {
-    background-image: radial-gradient(rgb(234 242 236 / 0.1) 1px, transparent 1.6px);
+    background-image: radial-gradient(rgb(19 36 28 / 0.09) 1px, transparent 1.6px);
     background-size: 22px 22px;
   }
 
+  .sb-pattern--paws {
+    background-image: var(--paw-pattern);
+    background-size: 120px 120px;
+  }
+
   .sb-pattern--contour {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='320' fill='none' stroke='%236EE7B7' stroke-opacity='0.08'><path d='M0 40 C120 10 220 70 320 40 S520 10 640 40'/><path d='M0 80 C120 50 220 110 320 80 S520 50 640 80'/><path d='M0 120 C120 90 220 150 320 120 S520 90 640 120'/><path d='M0 160 C120 130 220 190 320 160 S520 130 640 160'/><path d='M0 200 C120 170 220 230 320 200 S520 170 640 200'/><path d='M0 240 C120 210 220 270 320 240 S520 210 640 240'/><path d='M0 280 C120 250 220 310 320 280 S520 250 640 280'/></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='320' fill='none' stroke='%230F7A47' stroke-opacity='0.08'><path d='M0 40 C120 10 220 70 320 40 S520 10 640 40'/><path d='M0 80 C120 50 220 110 320 80 S520 50 640 80'/><path d='M0 120 C120 90 220 150 320 120 S520 90 640 120'/><path d='M0 160 C120 130 220 190 320 160 S520 130 640 160'/><path d='M0 200 C120 170 220 230 320 200 S520 170 640 200'/><path d='M0 240 C120 210 220 270 320 240 S520 210 640 240'/><path d='M0 280 C120 250 220 310 320 280 S520 250 640 280'/></svg>");
     background-size: 640px 320px;
   }
 
-  .sb-grain {
-    opacity: 0.035;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    background-size: 160px 160px;
-  }
-
-  /* Paneles de vidrio noche (formulario, horario, tarjetas) */
-  .glass-panel,
+  /* Paneles (formulario, horario, tarjetas): tarjeta blanca con sombra suave */
+  .surface-card,
   .service-card,
   .vet-card,
   .review-card,
   .map-card,
   .google-badge,
   .faq-item {
-    background:
-      linear-gradient(180deg, rgb(234 242 236 / 0.065), rgb(234 242 236 / 0.02)),
-      rgb(17 35 27 / 0.72);
-    box-shadow:
-      inset 0 1px 0 rgb(234 242 236 / 0.07),
-      0 24px 48px -28px rgb(0 0 0 / 0.75);
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
   }
 
-  /* Blur solo en pantallas medianas en adelante: en móvil cuesta demasiado */
-  @media (min-width: 768px) {
-    .glass-panel {
-      -webkit-backdrop-filter: blur(14px) saturate(130%);
-      backdrop-filter: blur(14px) saturate(130%);
-    }
+  .surface-card {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
   }
 
   /* ---------- Tarjeta con spotlight + tilt (decor/SpotCard.jsx) ---------- */
   .spot-card {
+    /* Tinte de la luz que sigue al cursor (SpotCard tint="leaf|sky|sun|coral") */
+    --spot-a: rgb(34 197 94 / 0.14);
+    --spot-b: rgb(34 197 94 / 0.04);
     position: relative;
     isolation: isolate;
     transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
@@ -746,10 +753,25 @@
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    box-shadow: var(--shadow-night-lift);
+    box-shadow: var(--shadow-lift);
     opacity: 0;
     transition: opacity 320ms var(--ease-vet);
     pointer-events: none;
+  }
+
+  .spot-card--sky {
+    --spot-a: rgb(56 189 248 / 0.16);
+    --spot-b: rgb(56 189 248 / 0.05);
+  }
+
+  .spot-card--sun {
+    --spot-a: rgb(255 209 92 / 0.24);
+    --spot-b: rgb(255 209 92 / 0.07);
+  }
+
+  .spot-card--coral {
+    --spot-a: rgb(255 107 74 / 0.14);
+    --spot-b: rgb(255 107 74 / 0.04);
   }
 
   .spot-light {
@@ -769,7 +791,7 @@
     height: 420px;
     margin: -210px 0 0 -210px;
     border-radius: 9999px;
-    background: radial-gradient(closest-side, rgb(110 231 183 / 0.15), rgb(110 231 183 / 0.04) 55%, transparent);
+    background: radial-gradient(closest-side, var(--spot-a), var(--spot-b) 55%, transparent);
     transform: translate3d(var(--lx, 50%), var(--ly, 0px), 0);
     opacity: 0;
     transition: opacity 320ms var(--ease-vet);
@@ -777,10 +799,9 @@
 
   /* ---------- InfoStrip ---------- */
   .info-icon {
-    background: linear-gradient(180deg, rgb(110 231 183 / 0.16), rgb(110 231 183 / 0.06));
-    box-shadow:
-      inset 0 0 0 1px rgb(110 231 183 / 0.22),
-      0 6px 18px -8px rgb(110 231 183 / 0.5);
+    background: var(--color-leaf-soft);
+    color: var(--color-brand-hover);
+    box-shadow: inset 0 0 0 1px rgb(15 122 71 / 0.14);
   }
 
   .live-dot {
@@ -793,8 +814,8 @@
   }
 
   .live-dot.is-open {
-    background: var(--color-mint);
-    box-shadow: 0 0 10px rgb(110 231 183 / 0.8);
+    background: var(--color-leaf);
+    box-shadow: 0 0 0 2px var(--color-leaf-soft);
   }
 
   /* Único elemento que late: el estado en vivo */
@@ -803,26 +824,25 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: var(--color-mint);
+    background: var(--color-leaf);
     animation: live-pulse 1.8s var(--ease-vet) infinite;
   }
 
   .live-dot.is-closed {
-    background: #fbbf24;
+    background: var(--color-sun);
+    box-shadow: 0 0 0 2px var(--color-sun-soft), inset 0 0 0 1px rgb(19 36 28 / 0.18);
   }
 
   /* ---------- Stats ---------- */
   .stats-grid {
     gap: 1px;
-    background: rgb(234 242 236 / 0.08);
-    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+    background: var(--color-line);
+    box-shadow: var(--shadow-card);
   }
 
   .stat-cell {
     isolation: isolate;
-    background:
-      linear-gradient(180deg, rgb(234 242 236 / 0.04), transparent),
-      rgb(12 26 20 / 0.94);
+    background: var(--color-card);
   }
 
   .stat-cell::before {
@@ -830,7 +850,7 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: radial-gradient(80% 70% at 50% 0%, rgb(110 231 183 / 0.16), transparent 70%);
+    background: radial-gradient(80% 70% at 50% 0%, var(--color-leaf-soft), transparent 70%);
     opacity: 0;
     transition: opacity 400ms var(--ease-vet);
   }
@@ -842,10 +862,8 @@
   /* ---------- Servicios ---------- */
   .service-art-wrap {
     min-height: 200px;
-    background:
-      radial-gradient(90% 80% at 50% 110%, rgb(110 231 183 / 0.14), transparent 65%),
-      linear-gradient(180deg, rgb(234 242 236 / 0.05), rgb(234 242 236 / 0.01));
-    box-shadow: inset 0 0 0 1px rgb(234 242 236 / 0.06);
+    background: linear-gradient(180deg, var(--color-leaf-soft), var(--color-card));
+    box-shadow: inset 0 0 0 1px var(--color-line);
   }
 
   @media (min-width: 1024px) {
@@ -855,11 +873,8 @@
   }
 
   .service-card--urgent {
-    border-color: rgb(110 231 183 / 0.25);
-    background:
-      radial-gradient(60% 120% at 0% 50%, rgb(110 231 183 / 0.12), transparent 70%),
-      linear-gradient(180deg, rgb(234 242 236 / 0.065), rgb(234 242 236 / 0.02)),
-      rgb(17 35 27 / 0.72);
+    border-color: rgb(255 107 74 / 0.35);
+    background: linear-gradient(120deg, var(--color-coral-soft), var(--color-card) 70%);
   }
 
   .price-chip {
@@ -869,8 +884,8 @@
     gap: 6px;
     padding: 6px 12px;
     border-radius: 9999px;
-    border: 1px solid rgb(110 231 183 / 0.28);
-    background: rgb(110 231 183 / 0.08);
+    border: 1px solid rgb(15 122 71 / 0.22);
+    background: var(--color-leaf-soft);
   }
 
   .service-art .art-main,
@@ -886,17 +901,18 @@
     transition: transform 300ms var(--ease-vet);
   }
 
-  /* ---------- Cómo agendar: teléfono con chat ---------- */
+  /* ---------- Cómo agendar: teléfono con chat (claro, tipo WhatsApp) ---------- */
   .phone {
     position: relative;
     width: min(300px, 100%);
     padding: 10px;
     border-radius: 46px;
-    background: linear-gradient(150deg, #2b3a33, #0e1814 45%, #1d2a24);
+    /* Carcasa grafito: hardware real sobre una página clara */
+    background: linear-gradient(150deg, #3a4741, #1b2621 50%, #2c3833);
     box-shadow:
-      inset 0 0 0 1px rgb(234 242 236 / 0.14),
-      0 50px 80px -30px rgb(0 0 0 / 0.9),
-      0 0 0 1px rgb(0 0 0 / 0.6);
+      inset 0 0 0 1px rgb(255 255 255 / 0.16),
+      0 40px 70px -30px rgb(19 50 34 / 0.45),
+      0 0 0 1px rgb(19 36 28 / 0.35);
   }
 
   @media (min-width: 640px) {
@@ -913,7 +929,8 @@
     height: 520px;
     margin: -260px 0 0 -260px;
     border-radius: 9999px;
-    background: radial-gradient(closest-side, rgb(110 231 183 / 0.22), transparent);
+    /* Disco suave de color (no glow): fondo de tarjeta postal detrás del teléfono */
+    background: radial-gradient(closest-side, var(--color-leaf-soft) 0 72%, transparent 100%);
     pointer-events: none;
   }
 
@@ -925,8 +942,8 @@
     overflow: hidden;
     border-radius: 37px;
     background:
-      radial-gradient(rgb(234 242 236 / 0.035) 1px, transparent 1.4px) 0 0 / 16px 16px,
-      #0b141a;
+      radial-gradient(rgb(19 36 28 / 0.06) 1px, transparent 1.4px) 0 0 / 16px 16px,
+      var(--color-raised);
   }
 
   .phone-notch {
@@ -946,7 +963,8 @@
     align-items: center;
     gap: 10px;
     padding: 46px 14px 12px;
-    background: #1f2c34;
+    background: var(--color-card);
+    box-shadow: 0 1px 0 var(--color-line);
   }
 
   .phone-chat {
@@ -962,9 +980,10 @@
     margin-bottom: 4px;
     padding: 3px 10px;
     border-radius: 8px;
-    background: #182229;
+    background: var(--color-card);
     font-size: 11px;
-    color: #a9b4bb;
+    color: var(--color-muted);
+    box-shadow: 0 1px 1px rgb(19 36 28 / 0.06);
   }
 
   .chat-bubble {
@@ -973,21 +992,21 @@
     border-radius: 12px;
     font-size: 13.5px;
     line-height: 1.35;
-    color: #e9edef;
-    box-shadow: 0 1px 1px rgb(0 0 0 / 0.3);
+    color: var(--color-ink);
+    box-shadow: 0 1px 1px rgb(19 36 28 / 0.08);
   }
 
   .chat-me {
     align-self: flex-end;
     border-top-right-radius: 4px;
-    background: #005c4b;
+    background: var(--color-leaf-soft);
   }
 
   .chat-vet,
   .chat-typing {
     align-self: flex-start;
     border-top-left-radius: 4px;
-    background: #1f2c34;
+    background: var(--color-card);
   }
 
   .chat-meta {
@@ -997,8 +1016,8 @@
     gap: 3px;
     margin-top: 2px;
     font-size: 10.5px;
-    /* ≥ 4.5:1 sobre la burbuja #005C4B */
-    color: #c9d3d8;
+    /* muted: 5.2:1 sobre leaf-soft, 5.7:1 sobre blanco */
+    color: var(--color-muted);
   }
 
   /* "Escribiendo...": solo lo muestra la línea de tiempo de escritorio */
@@ -1012,7 +1031,7 @@
     width: 7px;
     height: 7px;
     border-radius: 9999px;
-    background: #aab6bd;
+    background: var(--color-muted);
     animation: typing 1.2s ease-in-out infinite;
   }
 
@@ -1026,8 +1045,8 @@
 
   .chat-card {
     align-self: flex-start;
-    border: 1px solid rgb(110 231 183 / 0.35);
-    background: linear-gradient(140deg, rgb(110 231 183 / 0.18), rgb(110 231 183 / 0.05)), #10221b;
+    border: 1px solid rgb(56 189 248 / 0.45);
+    background: var(--color-sky-soft);
   }
 
   .phone-input {
@@ -1037,9 +1056,10 @@
     margin: 0 10px 12px;
     padding: 6px 6px 6px 16px;
     border-radius: 9999px;
-    background: #1f2c34;
+    background: var(--color-card);
     font-size: 13px;
-    color: #8f9ca3;
+    color: var(--color-muted);
+    box-shadow: 0 1px 1px rgb(19 36 28 / 0.06);
   }
 
   /* ---------- Equipo ---------- */
@@ -1091,7 +1111,7 @@
     overflow: hidden;
   }
 
-  /* Indicador mint de la pregunta abierta */
+  /* Indicador de la pregunta abierta (brand) */
   .faq-item::before {
     content: "";
     position: absolute;
@@ -1100,8 +1120,7 @@
     bottom: 18px;
     width: 3px;
     border-radius: 0 3px 3px 0;
-    background: var(--color-mint);
-    box-shadow: 0 0 12px rgb(110 231 183 / 0.7);
+    background: var(--color-brand);
     transform: scaleY(0);
     transition: transform 420ms var(--ease-vet);
   }
@@ -1111,19 +1130,14 @@
   }
 
   .faq-item.is-open {
-    background:
-      linear-gradient(180deg, rgb(110 231 183 / 0.07), rgb(110 231 183 / 0.02)),
-      rgb(17 35 27 / 0.8);
+    background: linear-gradient(180deg, var(--color-leaf-soft), var(--color-card) 70%);
   }
 
   .cta-card {
     background:
-      radial-gradient(90% 80% at 100% 0%, rgb(110 231 183 / 0.2), transparent 60%),
-      linear-gradient(180deg, rgb(234 242 236 / 0.06), rgb(234 242 236 / 0.02)),
-      rgb(17 35 27 / 0.8);
-    box-shadow:
-      inset 0 1px 0 rgb(234 242 236 / 0.08),
-      0 30px 60px -30px rgb(0 0 0 / 0.8);
+      radial-gradient(90% 80% at 100% 0%, var(--color-sun-soft), transparent 60%),
+      var(--color-card);
+    box-shadow: var(--shadow-card);
   }
 
   /* ---------- Contacto: etiquetas flotantes ---------- */
@@ -1151,7 +1165,7 @@
   }
 
   .float-field:has(:focus) .float-label {
-    color: var(--color-pine);
+    color: var(--color-brand);
   }
 
 
@@ -1182,14 +1196,15 @@
 
   .wordmark-outline {
     color: transparent;
-    -webkit-text-stroke: 1.5px rgb(110 231 183 / 0.35);
+    -webkit-text-stroke: 1.5px rgb(15 122 71 / 0.3);
   }
 
+  /* Relleno dentro del mismo tono verde (leaf → brand) */
   .wordmark-fill {
     position: absolute;
     inset: 0;
     padding-inline: 12px;
-    background: linear-gradient(100deg, #a7f3d0, #6ee7b7 45%, #2dd4bf);
+    background: linear-gradient(100deg, var(--color-leaf), var(--color-brand) 60%, var(--color-brand-hover));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -1204,7 +1219,7 @@
   @media (hover: hover) and (pointer: fine) {
     .spot-card:hover {
       --lift: -6px;
-      border-color: rgb(110 231 183 / 0.3);
+      border-color: rgb(15 122 71 / 0.3);
       will-change: transform;
     }
 
@@ -1259,11 +1274,11 @@
 
     .review-card:hover {
       transform: translate3d(0, -4px, 0) rotate(-0.5deg);
-      border-color: rgb(110 231 183 / 0.3);
+      border-color: rgb(15 122 71 / 0.3);
     }
 
     .faq-item:not(.is-open):hover {
-      border-color: rgb(234 242 236 / 0.2);
+      border-color: var(--color-line-strong);
     }
 
     .map-card:hover svg {
@@ -1311,21 +1326,309 @@
   }
 }
 
-/* Foco del formulario en noche: anillo mint (fuera de capa para ganarle a border-line) */
-.theme-night .fx-input:focus {
-  box-shadow: 0 0 0 4px rgb(110 231 183 / 0.16);
+/* Foco del formulario: anillo brand suave (fuera de capa para ganarle a border-line) */
+.fx-input:focus {
+  box-shadow: 0 0 0 4px rgb(15 122 71 / 0.14);
 }
 
-.theme-night .fx-input:focus:not([aria-invalid="true"]) {
-  border-color: rgb(110 231 183 / 0.55);
+.fx-input:focus:not([aria-invalid="true"]) {
+  border-color: rgb(15 122 71 / 0.6);
 }
 
-.theme-night .fx-input[aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 4px rgb(248 113 113 / 0.18);
+.fx-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 4px rgb(220 38 38 / 0.14);
 }
 
 /* El placeholder de ejemplo aparece solo al enfocar (la etiqueta ocupa su lugar).
    Fuera de capa para ganarle a la utilidad placeholder:text-muted. */
 .float-field input:not(:focus)::placeholder {
   color: transparent;
+}
+
+/* =====================================================================
+   v4 — Bandas, héroes, patrones y superficies del tema día.
+   Ver la guía en la cabecera del archivo. Solo tokens.
+   ===================================================================== */
+
+@layer base {
+  :root {
+    /* Huella fina para .pattern-paws / SectionBackdrop pattern="paws" (ink al 5 %) */
+    --paw-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%2313241C' fill-opacity='0.05'><g transform='translate(22 26) rotate(-18)'><ellipse cx='10' cy='16' rx='7' ry='6'/><circle cx='2' cy='6' r='3'/><circle cx='8' cy='1' r='3'/><circle cx='14' cy='1' r='3'/><circle cx='19' cy='6' r='3'/></g><g transform='translate(78 78) rotate(16)'><ellipse cx='10' cy='16' rx='7' ry='6'/><circle cx='2' cy='6' r='3'/><circle cx='8' cy='1' r='3'/><circle cx='14' cy='1' r='3'/><circle cx='19' cy='6' r='3'/></g></svg>");
+  }
+}
+
+@layer components {
+  /* ---------- Bandas de sección ---------- */
+  /* --band-bg: color de fondo de la banda, para piezas que "recortan" sobre ella
+     (p. ej. el anillo de los números de Cómo agendar) */
+  .band-page {
+    --band-bg: var(--color-page);
+    background-color: var(--band-bg);
+  }
+
+  .band-white {
+    --band-bg: var(--color-card);
+    background-color: var(--band-bg);
+  }
+
+  .band-raised {
+    --band-bg: var(--color-raised);
+    background-color: var(--band-bg);
+  }
+
+  .band-leaf {
+    --band-bg: var(--color-leaf-soft);
+    background-color: var(--band-bg);
+  }
+
+  .band-sky {
+    --band-bg: var(--color-sky-soft);
+    background-color: var(--band-bg);
+  }
+
+  .band-sun {
+    --band-bg: var(--color-sun-soft);
+    background-color: var(--band-bg);
+  }
+
+  .band-coral {
+    --band-bg: var(--color-coral-soft);
+    background-color: var(--band-bg);
+  }
+
+  /* Banda saturada: una por página como máximo (CTA final).
+     Texto blanco 5.4:1; secundario text-leaf-soft 4.9:1. Botón: variant="inverse". */
+  .band-brand {
+    --band-bg: var(--color-brand);
+    --color-line: rgb(255 255 255 / 0.2);
+    --color-line-strong: rgb(255 255 255 / 0.32);
+    background-color: var(--band-bg);
+    color: var(--color-card);
+  }
+
+  /* Tarjetas blancas dentro de una banda soft: hairline un poco más marcada (solo donde el
+     borde viene de .surface-card; un border-line utilitario gana por capa) */
+  :is(.band-leaf, .band-sky, .band-sun, .band-coral)
+    :where(.surface-card) {
+    border-color: var(--color-line-strong);
+  }
+
+  /* ---------- Fondos de hero: degradado suave entre tonos soft vecinos ---------- */
+  .hero-sky,
+  .hero-leaf,
+  .hero-sun,
+  .hero-coral {
+    position: relative;
+    isolation: isolate;
+    background-color: var(--color-page);
+  }
+
+  .hero-sky {
+    background-image: linear-gradient(165deg, var(--color-leaf-soft) 0%, var(--color-sky-soft) 55%, var(--color-page) 100%);
+  }
+
+  .hero-leaf {
+    background-image: linear-gradient(165deg, var(--color-leaf-soft) 0%, var(--color-page) 100%);
+  }
+
+  .hero-sun {
+    background-image: linear-gradient(165deg, var(--color-sun-soft) 0%, var(--color-leaf-soft) 60%, var(--color-page) 100%);
+  }
+
+  .hero-coral {
+    background-image: linear-gradient(165deg, var(--color-coral-soft) 0%, var(--color-sun-soft) 55%, var(--color-page) 100%);
+  }
+
+  /* ---------- Patrones finos (capa absoluta decorativa) ---------- */
+  .pattern-dots,
+  .pattern-paws {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 0%, transparent 80%);
+    mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, #000 0%, transparent 80%);
+  }
+
+  .pattern-dots {
+    background-image: radial-gradient(rgb(19 36 28 / 0.07) 1px, transparent 1.6px);
+    background-size: 22px 22px;
+  }
+
+  .pattern-paws {
+    background-image: var(--paw-pattern);
+    background-size: 120px 120px;
+  }
+
+  /* SectionBackdrop tone="...": capa de color de la banda */
+  .sb-tone {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ---------- Chip de filtro (decor/Badge.jsx → Chip) ---------- */
+  .chip {
+    transition-property: background-color, border-color, color, transform;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-vet);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .chip:hover:not([aria-pressed="true"]) {
+      border-color: var(--color-brand);
+    }
+  }
+}
+
+/* =====================================================================
+   v4 Fase B — piezas de página (header, tienda, servicios, urgencias, CTA).
+   Solo tokens. Hovers con transform solo con (hover: hover) and (pointer: fine).
+   ===================================================================== */
+
+@layer base {
+  :root {
+    /* Huella clara para fondos saturados (.cta-band): blanco al 8 % */
+    --paw-pattern-light: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' fill='%23FFFFFF' fill-opacity='0.08'><g transform='translate(22 26) rotate(-18)'><ellipse cx='10' cy='16' rx='7' ry='6'/><circle cx='2' cy='6' r='3'/><circle cx='8' cy='1' r='3'/><circle cx='14' cy='1' r='3'/><circle cx='19' cy='6' r='3'/></g><g transform='translate(78 78) rotate(16)'><ellipse cx='10' cy='16' rx='7' ry='6'/><circle cx='2' cy='6' r='3'/><circle cx='8' cy='1' r='3'/><circle cx='14' cy='1' r='3'/><circle cx='19' cy='6' r='3'/></g></svg>");
+  }
+}
+
+@layer components {
+  /* ---------- Header: ruta actual (NavLink .is-active + aria-current="page") ----------
+     Barra brand fija bajo el enlace + peso medio: se distingue sin depender del color. */
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .mobile-nav-link {
+    position: relative;
+    transition: background-color 200ms var(--ease-vet), color 200ms var(--ease-vet);
+  }
+
+  /* Móvil: pastilla leaf-soft + barra lateral brand. brand-hover sobre leaf-soft 6.8:1 */
+  .mobile-nav-link.is-active {
+    background-color: var(--color-leaf-soft);
+    color: var(--color-brand-hover);
+  }
+
+  .mobile-nav-link.is-active::before {
+    content: "";
+    position: absolute;
+    left: -2px;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    border-radius: 3px;
+    background: var(--color-brand);
+  }
+
+  /* ---------- Vitrina del producto por categoría (ProductCard) ---------- */
+  .vitrine--alimento {
+    background: linear-gradient(180deg, var(--color-card) 0%, var(--color-leaf-soft) 100%);
+  }
+
+  .vitrine--antiparasitarios {
+    background: linear-gradient(180deg, var(--color-card) 0%, var(--color-sky-soft) 100%);
+  }
+
+  .vitrine--higiene {
+    background: linear-gradient(180deg, var(--color-card) 0%, var(--color-sun-soft) 100%);
+  }
+
+  .vitrine--accesorios {
+    background: linear-gradient(180deg, var(--color-card) 0%, var(--color-coral-soft) 100%);
+  }
+
+  /* Nombre del producto: enlace al detalle */
+  .product-link {
+    transition: color 200ms var(--ease-vet);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .product-link:hover {
+      color: var(--color-brand-hover);
+    }
+  }
+
+  /* ---------- Tienda (/tienda) ---------- */
+  .shop-toolbar {
+    padding: 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  @media (min-width: 640px) {
+    .shop-toolbar {
+      padding: 20px 24px;
+    }
+  }
+
+  /* Estado vacío: borde punteado y un toque leaf (no parece un error) */
+  .shop-empty {
+    border: 1px dashed var(--color-line-strong);
+    background:
+      radial-gradient(70% 120% at 0% 0%, var(--color-leaf-soft), transparent 65%),
+      var(--color-card);
+  }
+
+  /* Detalle de producto: luz de estudio sobre el fondo de la categoría (bg-*-soft) */
+  .product-vitrine {
+    background-image: radial-gradient(65% 55% at 50% 38%, rgb(255 255 255 / 0.8), transparent 72%);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ---------- Servicios: ilustración con el tono de la tarjeta (SpotCard tint) ---------- */
+  .spot-card--sky .service-art-wrap {
+    background: linear-gradient(180deg, var(--color-sky-soft), var(--color-card));
+  }
+
+  .spot-card--sun .service-art-wrap {
+    background: linear-gradient(180deg, var(--color-sun-soft), var(--color-card));
+  }
+
+  .spot-card--coral .service-art-wrap {
+    background: linear-gradient(180deg, var(--color-coral-soft), var(--color-card));
+  }
+
+  /* Urgencias (página Servicios): coral-soft → sun-soft. ink-soft encima ≥ 6.8:1 */
+  .urgent-card {
+    border-color: color-mix(in srgb, var(--color-coral) 35%, transparent);
+    background: linear-gradient(120deg, var(--color-coral-soft) 0%, var(--color-sun-soft) 100%);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Cómo agendar: el número del paso recorta el riel con el color de la banda */
+  .htb-num {
+    box-shadow: 0 0 0 6px var(--band-bg, var(--color-page));
+  }
+
+  /* ---------- Banda final (CtaBand): brillo suave del mismo verde + huellas ----------
+     El brillo leaf (≤ 22 %) queda en la esquina, lejos del texto: blanco ≥ 4.5:1. */
+  .cta-band .band-brand {
+    isolation: isolate;
+  }
+
+  .cta-band .band-brand::before,
+  .cta-band .band-brand::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .cta-band .band-brand::before {
+    inset: 0;
+    background:
+      radial-gradient(42% 70% at 100% 0%, color-mix(in srgb, var(--color-leaf) 22%, transparent), transparent 70%),
+      radial-gradient(50% 80% at 0% 100%, var(--color-brand-hover), transparent 70%);
+  }
+
+  .cta-band .band-brand::after {
+    inset: 0;
+    background-image: var(--paw-pattern-light);
+    background-size: 120px 120px;
+    -webkit-mask-image: linear-gradient(90deg, transparent 35%, #000 100%);
+    mask-image: linear-gradient(90deg, transparent 35%, #000 100%);
+  }
 }

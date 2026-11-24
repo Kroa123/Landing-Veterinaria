@@ -111,3 +111,70 @@ Botón primario en oscuro: fondo mint #6EE7B7 con texto #0A1611. Glows verdes pe
 - La mitad inferior se veía "seca". Ahora toda la página usa `.theme-night`, con profundidad variada por sección (bandas night / night-raised, auroras suaves, patrones finos, grano). Sin hojas claras.
 - Se permite prueba social **de muestra**, marcada en los archivos de datos con `// muestra: reemplazar con datos reales` (rating de Google, años, pacientes).
 - Cada sección es un "momento": banda de stats con contadores, servicios interactivos, timeline fijada con chat de WhatsApp simulado, tarjetas del equipo, marquee de opiniones, FAQ a dos columnas con CTA, contacto final con mapa estilizado, footer con wordmark gigante.
+
+## v4 — Sitio web multipágina, claro y vivo, más 3D (decisión del cliente, 2026-11-24)
+
+El cliente aprobó el despliegue de v3 y ahora pide: (1) pasar de landing a **sitio web con varias páginas**, (2) colores **claros y vivos**, nada de fondo oscuro tipo "Doom", (3) **más 3D** (también fuera del hero). Esto **sustituye** el tema noche de v2/v3. Se mantiene: claridad, comercio primero, accesibilidad AA, `prefers-reduced-motion`, CSP `'self'`, rendimiento móvil, datos de muestra marcados.
+
+### Páginas y rutas (react-router-dom 7 (6.x tiene avisos de seguridad sin parche), `createBrowserRouter`, páginas con `React.lazy`)
+| Ruta | Página | Contenido |
+| --- | --- | --- |
+| `/` | Inicio | Hero con chapita 3D sobre fondo claro, franja de datos útiles, 4 productos destacados + "Ver toda la tienda", servicios destacados, stats, opiniones, CTA final "Agendar consulta". |
+| `/tienda` | Tienda | Catálogo completo: filtros por categoría, búsqueda, orden (precio, nombre), estado vacío. Filtros en la URL (`?cat=&q=&orden=`). |
+| `/tienda/:slug` | Detalle de producto | Visor 3D del empaque (gira solo, arrastrable), nombre, precio, descripción, modo de uso, para quién, peso/presentación, cantidad + agregar al carrito, productos relacionados. 404 si el slug no existe. |
+| `/servicios` | Servicios | Todos los servicios con detalle, precio "desde", qué incluye, urgencias 24 h, cómo agendar (3 pasos). Cada servicio con "Agendar este servicio" → `/agendar?servicio=<id>`. |
+| `/agendar` | Agendar | Formulario de reserva (el actual, que arma WhatsApp), prellenado desde `?servicio=`, horario y estado abierto/cerrado. |
+| `/nosotros` | Nosotros | Historia corta de la clínica, equipo, stats, opiniones, FAQ. |
+| `/contacto` | Contacto | Mapa estilizado, dirección, horario, teléfono/WhatsApp, urgencias, FAQ corta. |
+| `*` | 404 | Mensaje amable con la chapita, enlaces a Inicio y Tienda. |
+
+- Header con enlaces de ruta (`NavLink`, estado activo visible), carrito y CTA "Agendar". Footer con mapa del sitio. MobileBar se mantiene.
+- Cada página fija su `document.title` y meta description (hook `usePageMeta`). Scroll al inicio al cambiar de ruta (compatible con Lenis); hashes (`/nosotros#faq`) hacen scroll al ancla.
+- SPA fallback: `vercel.json` `rewrites` a `/index.html` y `netlify.toml` `[[redirects]] /* → /index.html 200`.
+- Carrito y drawer globales (persisten entre páginas).
+
+### Tokens día (nombres exactos)
+| Token | Hex | Uso |
+| --- | --- | --- |
+| `--color-page` | #F7FAF6 | Fondo de página (blanco con tinte verde muy leve) |
+| `--color-card` | #FFFFFF | Tarjetas |
+| `--color-raised` | #EEF4EF | Inputs, bandas alternas |
+| `--color-ink` | #13241C | Texto primario |
+| `--color-ink-soft` | #44544B | Texto secundario |
+| `--color-muted` | #5B6A61 | Meta (≥ 4.5:1 sobre page/card/raised) |
+| `--color-line` | rgba(19,36,28,0.10) | Hairlines |
+| `--color-brand` | #0F7A47 | Verde principal: botones primarios, enlaces (texto blanco encima ≥ 4.5:1) |
+| `--color-brand-hover` | #0B6239 | Hover |
+| `--color-leaf` | #22C55E | Verde vivo decorativo, rellenos grandes, chapita 3D (texto ink encima) |
+| `--color-leaf-soft` | #DCFCE7 | Fondos de chip / bandas verdes |
+| `--color-coral` | #FF6B4A | Acento cálido: ofertas, badges, ilustración (texto ink encima, nunca texto coral sobre blanco) |
+| `--color-coral-soft` | #FFE7E0 | Fondos cálidos |
+| `--color-sky` | #38BDF8 | Acento frío: servicios, info (texto ink encima) |
+| `--color-sky-soft` | #E0F2FE | Fondos fríos |
+| `--color-sun` | #FFD15C | Destacados, estrellas, highlights |
+| `--color-sun-soft` | #FFF6D6 | Fondos amarillos |
+
+- Secciones alternan fondo page / blanco / bandas suaves de color (leaf-soft, sky-soft, sun-soft, coral-soft). Una banda saturada por página como máximo (p. ej. CTA final en brand con texto blanco).
+- Foco: anillo `--color-brand` 2px con offset, visible en todas las bandas.
+- Sombras suaves neutras con tinte verde, no glows de neón. Degradados permitidos solo suaves dentro de un mismo tono o entre tonos soft vecinos (leaf-soft → sky-soft) en fondos de hero.
+- Tipografía, radios, grilla, iconos: igual que v1.
+
+### 3D
+- Hero (Inicio): chapita V metálica en verde vivo `leaf`/`brand` con borde plateado, productos flotando, iluminación clara de estudio (Lightformers, sin HDR remoto), fondo claro.
+- Detalle de producto: visor 3D del empaque del producto (bolsa/caja/frasco según categoría, colores del empaque), autorrotación, arrastre con OrbitControls limitado, sin zoom. Lazy, en el mismo chunk 3D.
+- 404 y Agendar pueden reutilizar la chapita 3D pequeña.
+- Mismos fallbacks que v2: reduced-motion, sin WebGL, gama baja, contexto perdido → SVG/ilustración estática. Pausar fuera de pantalla.
+
+### Propiedad de archivos (para que los agentes no choquen)
+- **Fase A (paralelo)**
+  - frontend-developer: `package.json`, `src/main.jsx`, `src/App.jsx`, `src/router.jsx`, `src/pages/**`, `src/data/**`, `src/lib/**`, `src/hooks/**`, `src/context/**`, `src/components/layout/**`, `src/components/sections/**`, `src/components/shop/**`, `src/components/three/**`, `src/components/motion/{SmoothScroll,Reveal,FlyToCart,gsap}.*`, `vercel.json`, `netlify.toml`, `vite.config.js`.
+  - ui-ux-designer: `src/styles.css`, `src/components/motion/motion.css`, `src/components/motion/NightBackdrop.jsx` (renombrar/reemplazar por fondo claro), `src/components/ui/**`, `src/components/decor/**`.
+- **Fase B**: ui-ux-designer pasa los estilos de `sections/`, `shop/`, `layout/`, `pages/` del tema noche al tema día (frontend ya no los toca).
+- **Fase C**: qa-tester + code-reviewer.
+
+### Estado tras Fase B (2026-11-24)
+- Tema noche eliminado por completo (tokens, `.theme-night`, NightBackdrop, variantes `night-*` de Button).
+- Clases semánticas vigentes documentadas en la cabecera de `src/styles.css`: `.band-*` (fijan `--band-bg`), `.hero-{sky,leaf,sun,coral}`, `.surface-card`, `.vitrine--<categoría>`, `.pattern-{dots,paws}`, `.chip`, `.feature-tile`, `.text-highlight`.
+- Button: `primary`, `secondary`, `shop`, `selected`, `accent`, `inverse` (solo dentro de `.band-brand`), `quiet`; prop `to` para rutas internas.
+- Footer claro (`band-raised`); la única banda saturada por página es `CtaBand` (`band-brand`).
+- Tokens extra: `--color-line-strong`, `--shadow-card/soft/float/lift/bar`, `--drop-shadow-pack/chapita/tag`.

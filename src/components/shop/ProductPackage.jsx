@@ -142,17 +142,13 @@ function Hanger({ color, band, product }) {
 
 const SHAPES = { bag: Bag, box: Box, bottle: Bottle, hanger: Hanger }
 
-// Sombra de apoyo según el fondo: en noche, una sombra neutra clara no se vería
-const GROUND = {
-  light: ['rgba(22,32,27,0.12)', 'rgba(22,32,27,0.10)'],
-  night: ['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.35)'],
-}
+// Sombra de apoyo neutra con tinte verde (todas las superficies son claras)
+const GROUND = ['rgba(22,32,27,0.12)', 'rgba(22,32,27,0.10)']
 
-// tone: "light" (por defecto) o "night" (tarjetas sobre fondo oscuro).
 // Clases .pack-body y .pack-shadow: el cuerpo se eleva y la sombra se achica al pasar el cursor
 // por una tarjeta .tilt-card (ver styles.css).
-export default function ProductPackage({ product, className = '', tone = 'light' }) {
-  const ground = GROUND[tone] || GROUND.light
+export default function ProductPackage({ product, className = '' }) {
+  const ground = GROUND
   const light = `luz-${useId().replace(/:/g, '')}`
   const color = PACK_COLORS[product.category] || PACK_COLORS.alimento
   const band = PACK_INK[product.category] || PACK_INK.alimento

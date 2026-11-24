@@ -4,7 +4,11 @@ import { pointerMotionOk } from '../../lib/motionOk.js'
 // Tarjeta con luz que sigue al cursor (spotlight) y tilt 3D leve.
 // Escribe --rx, --ry, --lx, --ly una vez por frame; estilos en styles.css (.spot-card).
 // Solo con mouse, hover y sin prefers-reduced-motion. En táctil es una tarjeta estática.
-export default function SpotCard({ as: Tag = 'article', tilt = 5, className = '', children, ...rest }) {
+// tint: color de la luz: 'leaf' (por defecto) | 'sky' | 'sun' | 'coral'. En .service-card también
+// tiñe el fondo de la ilustración (styles.css).
+const TINTS = { leaf: '', sky: 'spot-card--sky', sun: 'spot-card--sun', coral: 'spot-card--coral' }
+
+export default function SpotCard({ as: Tag = 'article', tilt = 5, tint = 'leaf', className = '', children, ...rest }) {
   const ref = useRef(null)
   const frame = useRef(0)
   const point = useRef(null)
@@ -68,7 +72,7 @@ export default function SpotCard({ as: Tag = 'article', tilt = 5, className = ''
       onPointerEnter={onPointerEnter}
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
-      className={`spot-card ${className}`}
+      className={`spot-card ${TINTS[tint] ?? ''} ${className}`}
       {...rest}
     >
       <span className="spot-light" aria-hidden="true" />

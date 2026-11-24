@@ -7,6 +7,12 @@ import { useGSAP } from '@gsap/react'
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText)
 
+// ScrollTrigger guarda history.scrollRestoration al iniciar ('auto') y lo repone en cada
+// refresh(). Con 'auto' el navegador restaura sobre el DOM de la página anterior al ir
+// Atrás y pisa la restauración del sitio (hooks/useRouteScroll.js). clearScrollMemory con
+// un texto fija ese valor interno y el de history: queda 'manual' para siempre.
+ScrollTrigger.clearScrollMemory('manual')
+
 // La curva del sitio (--ease-vet: cubic-bezier(0.22, 1, 0.36, 1)) en términos de GSAP
 export const EASE = 'expo.out'
 

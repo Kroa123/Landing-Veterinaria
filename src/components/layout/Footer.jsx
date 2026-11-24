@@ -1,16 +1,26 @@
 import { useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowUp, ArrowUpRight, AtSign, CalendarDays, Phone } from 'lucide-react'
 import Container from '../ui/Container.jsx'
 import Reveal from '../motion/Reveal.jsx'
 import Logo from '../ui/Logo.jsx'
 import Icon from '../ui/Icon.jsx'
 import Button from '../ui/Button.jsx'
-import SectionBackdrop from '../decor/SectionBackdrop.jsx'
 import { gsap, useGSAP } from '../motion/gsap.js'
 import { site } from '../../config/site.js'
+import { bookPath, footerNav } from '../../data/navigation.js'
+import { focusWithoutScroll, scrollToTop } from '../../lib/scroll.js'
 
-// Pie de página: columnas, redes, volver arriba y una marca gigante en contorno que
-// se rellena de mint con el scroll (scrub). Con reduced-motion la marca se ve rellena.
+// Pie de página claro (banda raised: la banda saturada de la página es el CtaBand, así que el
+// footer no puede serlo): columnas, redes, volver arriba y una marca gigante en contorno que
+// se rellena de verde (leaf → brand) con el scroll (scrub). Con reduced-motion se ve rellena.
+// Volver arriba: scroll suave (Lenis si existe) y foco al inicio del contenido
+function backToTop() {
+  scrollToTop({ immediate: false })
+  const main = document.getElementById('contenido')
+  focusWithoutScroll(main?.querySelector('h1') || main)
+}
+
 export default function Footer() {
   const year = new Date().getFullYear()
   const wordRef = useRef(null)
@@ -37,39 +47,34 @@ export default function Footer() {
   )
 
   return (
-    <footer className="theme-night relative isolate overflow-hidden bg-night pb-32 pt-20 md:pb-10">
-      <SectionBackdrop glows="e" pattern="none" />
-      {/* Línea de luz superior: costura suave con Contacto */}
-      <span
-        className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgb(110_231_183/0.35),transparent)]"
-        aria-hidden="true"
-      />
+    <footer className="band-raised relative isolate overflow-hidden border-t border-line pb-32 pt-20 md:pb-10">
+      <div className="pattern-paws" aria-hidden="true" />
       <Container>
         <Reveal stagger={0.06} y={16} start="top 95%" className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="col-span-2 md:col-span-1">
-            <a
-              href="#inicio"
+            <Link
+              to="/"
               className="fx-logo -ml-1 inline-flex min-h-11 items-center rounded-control px-1"
-              aria-label={`${site.name}, volver al inicio`}
+              aria-label={`${site.name}, ir al inicio`}
             >
               <Logo />
-            </a>
+            </Link>
             <p className="mt-4 max-w-[22rem] text-[15px] leading-6 text-ink-soft">
               {site.tagline} para perros y gatos. {site.address.street}.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button href="#contacto" variant="night-primary" size="sm">
+              <Button to={bookPath} variant="primary" size="sm">
                 <Icon icon={CalendarDays} />
                 Agendar consulta
               </Button>
-              <Button href="#tienda" variant="night-secondary" size="sm">
+              <Button to="/tienda" variant="secondary" size="sm">
                 Ver tienda
               </Button>
             </div>
           </div>
 
           <div className="col-span-2 sm:col-span-1">
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.12em] text-mint">Horario</h2>
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-brand">Horario</h2>
             <ul className="mt-4 space-y-2 font-mono text-[13px] leading-5 text-ink-soft">
               {site.hours.map((h) => (
                 <li key={h.label}>
@@ -81,11 +86,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.12em] text-mint">Contacto</h2>
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-brand">Contacto</h2>
             <ul className="mt-3 space-y-1 text-[15px] text-ink-soft">
               <li>
                 <a href={site.phone.href} className="fx-link inline-flex min-h-11 items-center gap-2 font-mono text-[14px] tabular-nums hover:text-ink">
-                  <Icon icon={Phone} size={16} className="text-mint" />
+                  <Icon icon={Phone} size={16} className="text-brand" />
                   {site.phone.display}
                 </a>
               </li>
@@ -95,9 +100,9 @@ export default function Footer() {
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="social-link group inline-flex min-h-11 items-center gap-2 rounded-full border border-night-line py-1 pl-1 pr-4 hover:text-ink"
+                    className="social-link group inline-flex min-h-11 items-center gap-2 rounded-full border border-line-strong bg-card py-1 pl-1 pr-4 transition-colors hover:border-brand hover:text-ink"
                   >
-                    <span className="flex size-8 items-center justify-center rounded-full bg-mint/10 text-mint transition-colors group-hover:bg-mint group-hover:text-night">
+                    <span className="flex size-8 items-center justify-center rounded-full bg-leaf-soft text-brand-hover transition-colors group-hover:bg-brand group-hover:text-white">
                       <Icon icon={AtSign} size={16} />
                     </span>
                     {s.label} {s.handle}
@@ -109,14 +114,14 @@ export default function Footer() {
             </ul>
           </div>
 
-          <nav aria-label="Pie de página">
-            <h2 className="text-[13px] font-medium uppercase tracking-[0.12em] text-mint">Secciones</h2>
+          <nav aria-label="Mapa del sitio">
+            <h2 className="text-[13px] font-semibold uppercase tracking-[0.12em] text-brand">Mapa del sitio</h2>
             <ul className="mt-3 space-y-1 text-[15px] text-ink-soft">
-              {site.nav.map((item) => (
-                <li key={item.href}>
-                  <a href={item.href} className="fx-link inline-flex min-h-11 items-center hover:text-ink">
+              {footerNav.map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="fx-link inline-flex min-h-11 items-center hover:text-ink">
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -131,19 +136,20 @@ export default function Footer() {
       </div>
 
       <Container>
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-night-line pt-6">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
           <p className="text-[13px] text-ink-soft">
             © {year} {site.name}. Precios en pesos chilenos, sujetos a stock.
           </p>
-          <a
-            href="#inicio"
-            className="back-top group inline-flex min-h-11 items-center gap-3 rounded-full border border-night-line py-1 pl-4 pr-1 text-[14px] text-ink-soft transition-colors hover:border-mint/50 hover:text-ink"
+          <button
+            type="button"
+            onClick={backToTop}
+            className="back-top group inline-flex min-h-11 items-center gap-3 rounded-full border border-line-strong bg-card py-1 pl-4 pr-1 text-[14px] text-ink-soft transition-colors hover:border-brand hover:text-ink"
           >
             Volver arriba
-            <span className="flex size-9 items-center justify-center rounded-full bg-mint text-night">
+            <span className="flex size-9 items-center justify-center rounded-full bg-brand text-white">
               <Icon icon={ArrowUp} className="back-top-arrow" />
             </span>
-          </a>
+          </button>
         </div>
       </Container>
     </footer>

@@ -1,4 +1,4 @@
-/* Utilidades de motion del sistema v2 (Lenis, fondo noche, vuelo al carrito).
+/* Utilidades de motion (Lenis, fondo día v4, vuelo al carrito).
    Se importa desde main.jsx después de styles.css. Solo transform/opacity en animaciones. */
 
 /* Lenis controla el scroll: el smooth nativo de styles.css lo haría doble */
@@ -12,9 +12,13 @@ html.lenis body {
   outline: none;
 }
 
-/* ---------- Fondo noche: aurora + grano ---------- */
+/* ---------- Fondo día (v4): formas orgánicas suaves (DayBackdrop.jsx) ----------
+   Capa absoluta bajo el contenido; la sección padre debe ser `relative isolate`
+   (las clases .hero-* ya lo son). Formas de color soft sólido, sin blur ni glow.
+   Animación lenta de deriva (transform) + respiración (opacity). Fuera de pantalla se
+   pausa (.is-paused) y con prefers-reduced-motion queda estática. */
 
-.night-backdrop {
+.day-backdrop {
   position: absolute;
   inset: 0;
   z-index: -1;
@@ -23,104 +27,136 @@ html.lenis body {
   contain: strict;
 }
 
-.aurora-blob {
+.day-shape {
   position: absolute;
-  border-radius: 9999px;
-  /* Degradado radial en vez de blur: suave por naturaleza y barato de componer */
-  background: radial-gradient(closest-side, var(--blob-color) 0%, transparent 100%);
+  /* Silueta orgánica: border-radius de 8 valores, sin SVG ni filtros */
+  border-radius: 62% 38% 54% 46% / 48% 58% 42% 52%;
+  opacity: var(--shape-opacity, 0.9);
+  will-change: transform;
 }
 
-.aurora-blob--a {
-  --blob-color: rgb(110 231 183 / 0.22);
-  width: 62vmax;
-  height: 46vmax;
-  top: -18vmax;
-  right: -14vmax;
-  animation: aurora-a 26s ease-in-out infinite alternate;
-}
-
-.aurora-blob--b {
-  --blob-color: rgb(52 211 153 / 0.16);
-  width: 54vmax;
+.day-shape--a {
+  width: 46vmax;
   height: 40vmax;
-  bottom: -20vmax;
-  left: -16vmax;
-  animation: aurora-b 32s ease-in-out infinite alternate;
+  top: -16vmax;
+  right: -12vmax;
+  background: var(--color-leaf-soft);
+  animation: day-drift-a 28s ease-in-out infinite alternate;
 }
 
-.aurora-blob--c {
-  --blob-color: rgb(30 91 67 / 0.55);
-  width: 48vmax;
-  height: 48vmax;
-  top: 20%;
-  left: 30%;
-  animation: aurora-c 38s ease-in-out infinite alternate;
+.day-shape--b {
+  width: 38vmax;
+  height: 34vmax;
+  bottom: -18vmax;
+  left: -12vmax;
+  border-radius: 44% 56% 38% 62% / 58% 42% 58% 42%;
+  background: var(--color-sky-soft);
+  animation: day-drift-b 34s ease-in-out infinite alternate;
 }
 
-@keyframes aurora-a {
+.day-shape--c {
+  width: 18vmax;
+  height: 16vmax;
+  top: 18%;
+  left: 46%;
+  border-radius: 50% 50% 42% 58% / 56% 46% 54% 44%;
+  background: var(--color-sun-soft);
+  --shape-opacity: 1;
+  animation: day-drift-c 24s ease-in-out infinite alternate;
+}
+
+.day-shape--d {
+  width: 12vmax;
+  height: 12vmax;
+  bottom: 14%;
+  right: 18%;
+  border-radius: 58% 42% 50% 50% / 46% 54% 46% 54%;
+  background: var(--color-coral-soft);
+  --shape-opacity: 0.85;
+  animation: day-drift-d 30s ease-in-out infinite alternate;
+}
+
+/* Variante "warm": sol y coral delante (Agendar, ofertas) */
+.day-backdrop--warm .day-shape--a {
+  background: var(--color-sun-soft);
+}
+
+.day-backdrop--warm .day-shape--b {
+  background: var(--color-coral-soft);
+}
+
+.day-backdrop--warm .day-shape--c {
+  background: var(--color-leaf-soft);
+}
+
+/* Variante "calm": solo verdes y cielo, sin acentos cálidos */
+.day-backdrop--calm .day-shape--c,
+.day-backdrop--calm .day-shape--d {
+  display: none;
+}
+
+@keyframes day-drift-a {
   from {
-    transform: translate3d(0, 0, 0) scale(1);
-    opacity: 0.9;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
   }
   to {
-    transform: translate3d(-12vmax, 8vmax, 0) scale(1.15);
-    opacity: 0.6;
+    transform: translate3d(-6vmax, 4vmax, 0) rotate(14deg) scale(1.08);
   }
 }
 
-@keyframes aurora-b {
+@keyframes day-drift-b {
   from {
-    transform: translate3d(0, 0, 0) scale(1.1);
-    opacity: 0.7;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1.04);
   }
   to {
-    transform: translate3d(14vmax, -6vmax, 0) scale(0.95);
+    transform: translate3d(7vmax, -3vmax, 0) rotate(-12deg) scale(0.96);
+  }
+}
+
+@keyframes day-drift-c {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-4vmax, 3vmax, 0) rotate(40deg);
     opacity: 1;
   }
 }
 
-@keyframes aurora-c {
+@keyframes day-drift-d {
   from {
-    transform: translate3d(-6vmax, -4vmax, 0) scale(0.9);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   to {
-    transform: translate3d(8vmax, 6vmax, 0) scale(1.1);
+    transform: translate3d(3vmax, -4vmax, 0) rotate(-30deg);
   }
 }
 
-/* Fuera de pantalla (NightBackdrop con IntersectionObserver): la aurora se detiene */
-.night-backdrop.is-paused .aurora-blob {
+.day-backdrop.is-paused .day-shape {
   animation-play-state: paused;
 }
 
-/* Grano: ruido SVG local (data URI, permitido por img-src 'self' data:).
-   Sin mix-blend-mode: a esta opacidad se ve igual y no obliga a recomponer el fondo */
-.night-grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  background-size: 160px 160px;
-}
-
-/* Fundidos: la aurora se apaga hacia noche plana en el borde, así no hay costura con la
-   sección vecina (bg-night). Color fijo: el hero no está dentro de .theme-night */
-.night-fade-bottom,
-.night-fade-top {
+/* Fundido inferior hacia page: sin costura con la sección siguiente */
+.day-fade-bottom {
   position: absolute;
   inset-inline: 0;
-  height: 10rem;
+  bottom: 0;
+  height: 8rem;
+  background: linear-gradient(to bottom, rgb(247 250 246 / 0) 0%, var(--color-page) 100%);
   pointer-events: none;
 }
 
-.night-fade-bottom {
-  bottom: 0;
-  background: linear-gradient(to bottom, rgb(10 22 17 / 0) 0%, var(--color-night) 100%);
-}
+/* En móvil, formas más pequeñas y sin la cuarta (menos composición) */
+@media (max-width: 639.98px) {
+  .day-shape--d {
+    display: none;
+  }
 
-.night-fade-top {
-  top: 0;
-  background: linear-gradient(to top, rgb(10 22 17 / 0) 0%, var(--color-night) 100%);
+  .day-shape--c {
+    left: 60%;
+    top: 8%;
+  }
 }
 
 /* ---------- Vuelo al carrito ---------- */
@@ -139,15 +175,16 @@ html.lenis body {
   width: 16px;
   height: 16px;
   border-radius: 9999px;
-  background: var(--color-mint, #6ee7b7);
+  background: var(--color-coral, #ff6b4a);
   box-shadow:
-    0 0 0 3px rgb(110 231 183 / 0.25),
-    0 6px 16px rgb(10 22 17 / 0.35);
+    0 0 0 3px rgb(255 255 255 / 0.9),
+    0 6px 16px rgb(19 50 34 / 0.3);
   will-change: transform, opacity;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aurora-blob {
+  .day-shape {
     animation: none;
+    will-change: auto;
   }
 }

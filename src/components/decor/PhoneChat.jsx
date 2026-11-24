@@ -5,6 +5,7 @@ import { site } from '../../config/site.js'
 // Teléfono con una conversación de WhatsApp de ejemplo (todo en código, sin imágenes).
 // Cada burbuja lleva data-step (0, 1, 2) para que HowToBook la anime con el scroll.
 // Es ilustrativo: se expone como una imagen con descripción para lectores de pantalla.
+// Tema día (v4): chat claro tipo WhatsApp. Contraste: ink sobre burbujas ≥ 14:1, meta muted ≥ 5.2:1.
 
 // muestra: conversación ilustrativa (nombres, horas y mascota de ejemplo)
 const chat = [
@@ -29,9 +30,9 @@ function Bubble({ msg }) {
   if (msg.from === 'card') {
     return (
       <div data-step={msg.step} className="chat-bubble chat-card">
-        <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-mint">Hora confirmada</p>
-        <p className="mt-1 text-[15px] font-semibold leading-5 text-on-night">Jueves · 11:30</p>
-        <p className="text-[12px] leading-4 text-on-night-soft">Consulta general · Luna</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-soft">Hora confirmada</p>
+        <p className="mt-1 text-[15px] font-semibold leading-5 text-ink">Jueves · 11:30</p>
+        <p className="text-[12px] leading-4 text-ink-soft">Consulta general · Luna</p>
       </div>
     )
   }
@@ -41,7 +42,7 @@ function Bubble({ msg }) {
       <p>{msg.text}</p>
       <span className="chat-meta">
         {msg.time}
-        {mine ? <CheckCheck size={13} strokeWidth={2} className="text-[#53BDEB]" aria-hidden="true" /> : null}
+        {mine ? <CheckCheck size={13} strokeWidth={2} className="text-sky" aria-hidden="true" /> : null}
       </span>
     </div>
   )
@@ -57,12 +58,12 @@ export default function PhoneChat({ className = '' }) {
       <div className="phone-screen">
         <div className="phone-notch" />
         <div className="phone-header">
-          <span className="flex size-9 items-center justify-center rounded-full bg-[#0f2a1f]">
+          <span className="flex size-9 items-center justify-center rounded-full bg-leaf-soft">
             <LogoMark size={26} />
           </span>
           <div className="min-w-0">
-            <p className="text-[14px] font-semibold leading-4 text-on-night">{site.name}</p>
-            <p className="text-[11px] leading-4 text-mint">en línea</p>
+            <p className="text-[14px] font-semibold leading-4 text-ink">{site.name}</p>
+            <p className="text-[11px] leading-4 text-brand">en línea</p>
           </div>
         </div>
         <div className="phone-chat">
@@ -73,7 +74,7 @@ export default function PhoneChat({ className = '' }) {
         </div>
         <div className="phone-input">
           <span className="flex-1 truncate">Escribe un mensaje</span>
-          <span className="flex size-8 items-center justify-center rounded-full bg-mint" />
+          <span className="flex size-8 items-center justify-center rounded-full bg-brand" />
         </div>
       </div>
     </div>

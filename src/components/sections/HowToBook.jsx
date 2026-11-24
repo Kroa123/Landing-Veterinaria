@@ -9,11 +9,12 @@ import PhoneChat from '../decor/PhoneChat.jsx'
 import { questionUrl } from '../../lib/booking.js'
 import { gsap, useGSAP } from '../motion/gsap.js'
 import { site } from '../../config/site.js'
+import { bookPath } from '../../data/navigation.js'
 
 const steps = [
   {
     title: 'Elige servicio y día',
-    text: 'Completa el formulario de esta página o escríbenos por WhatsApp con el nombre de tu mascota y el día que te acomoda.',
+    text: 'Completa el formulario de reserva o escríbenos por WhatsApp con el nombre de tu mascota y el día que te acomoda.',
   },
   {
     title: 'Te confirmamos la hora',
@@ -28,7 +29,8 @@ const steps = [
 // Cómo agendar: en escritorio la sección se fija (pin) y el scroll avanza la línea de
 // progreso, enciende cada paso y escribe la conversación de WhatsApp en el teléfono.
 // En móvil los pasos van apilados y el chat entra solo. Con reduced-motion, todo estático.
-export default function HowToBook() {
+// band: fondo de la sección (clase .band-*); sky por defecto.
+export default function HowToBook({ band = 'sky' }) {
   const root = useRef(null)
 
   useGSAP(
@@ -110,8 +112,8 @@ export default function HowToBook() {
   )
 
   return (
-    <section ref={root} id="como-agendar" aria-labelledby="agendar-title" className="theme-night relative isolate overflow-hidden">
-      <SectionBackdrop glows="d" pattern="contour" band />
+    <section ref={root} id="como-agendar" aria-labelledby="agendar-title" className={`band-${band} relative isolate overflow-hidden`}>
+      <SectionBackdrop glows="d" pattern="contour" />
       <div className="htb-pin py-24 lg:flex lg:min-h-screen lg:items-center lg:py-20 lg:pt-28 lg:[@media(max-height:880px)]:py-12 lg:[@media(max-height:880px)]:pt-20">
         <Container className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-20">
           <div className="min-w-0">
@@ -121,7 +123,7 @@ export default function HowToBook() {
               size="md"
               title={
                 <>
-                  Tu hora lista <span className="text-glow">en tres mensajes</span>
+                  Tu hora lista <span className="text-highlight">en tres mensajes</span>
                 </>
               }
             />
@@ -129,33 +131,33 @@ export default function HowToBook() {
             <ol className="htb-steps relative mt-10 space-y-3">
               {/* Riel de progreso: se dibuja con el scroll */}
               <span className="absolute bottom-6 left-[29px] top-6 w-px bg-line-strong" aria-hidden="true">
-                <span className="htb-progress absolute inset-0 origin-top bg-[linear-gradient(to_bottom,#6EE7B7,#34D399)] shadow-[0_0_12px_rgb(110_231_183/0.6)]" />
+                <span className="htb-progress absolute inset-0 origin-top bg-[linear-gradient(to_bottom,var(--color-leaf),var(--color-brand))]" />
               </span>
               {steps.map((step, i) => (
-                <li key={step.title} className="htb-step fx-group relative flex gap-5 rounded-[20px] p-3 pr-4 transition-colors hover:bg-raised">
+                <li key={step.title} className="htb-step fx-group relative flex gap-5 rounded-[20px] p-3 pr-4 transition-colors hover:bg-card/70">
                   <span
-                    className="htb-num relative z-[1] flex size-[34px] shrink-0 items-center justify-center rounded-full border border-mint/40 bg-night font-mono text-[14px] tabular-nums text-mint shadow-[0_0_0_6px_var(--color-night-raised)]"
+                    className="htb-num relative z-[1] flex size-[34px] shrink-0 items-center justify-center rounded-full border border-brand/40 bg-card font-mono text-[14px] font-medium tabular-nums text-brand-hover"
                     aria-hidden="true"
                   >
                     {i + 1}
                   </span>
                   <div className="pt-1">
-                    <h3 className="text-[19px] font-medium leading-6 text-on-night">
+                    <h3 className="text-[19px] font-medium leading-6 text-ink">
                       <span className="sr-only">Paso {i + 1}: </span>
                       {step.title}
                     </h3>
-                    <p className="mt-1.5 max-w-[30rem] text-[15px] leading-6 text-on-night-soft">{step.text}</p>
+                    <p className="mt-1.5 max-w-[30rem] text-[15px] leading-6 text-ink-soft">{step.text}</p>
                   </div>
                 </li>
               ))}
             </ol>
 
             <div className="mt-10 flex flex-wrap gap-3">
-              <Button href="#contacto" variant="night-primary" size="lg">
+              <Button to={bookPath} variant="primary" size="lg">
                 <Icon icon={CalendarDays} />
                 Agendar ahora
               </Button>
-              <Button href={questionUrl} external variant="night-secondary" size="lg">
+              <Button href={questionUrl} external variant="secondary" size="lg">
                 <Icon icon={MessageCircle} />
                 Escribir por WhatsApp
                 <span className="sr-only"> (se abre en otra pestaña)</span>

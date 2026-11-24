@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, ShoppingBag, X } from 'lucide-react'
 import Container from '../ui/Container.jsx'
 import Logo from '../ui/Logo.jsx'
@@ -6,6 +7,7 @@ import Button from '../ui/Button.jsx'
 import Icon from '../ui/Icon.jsx'
 import { site } from '../../config/site.js'
 import { useCart } from '../../context/cart.js'
+import { bookPath, mainNav } from '../../data/navigation.js'
 
 export function CartButton({ className = '' }) {
   const { count, openCart, isOpen } = useCart()
@@ -23,7 +25,7 @@ export function CartButton({ className = '' }) {
       {count > 0 ? (
         <span
           key={count}
-          className="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-pine px-1 font-mono text-[11px] font-medium leading-none tabular-nums text-white ring-2 ring-page motion-safe:animate-bump"
+          className="absolute right-0.5 top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 font-mono text-[11px] font-medium leading-none tabular-nums text-white ring-2 ring-card motion-safe:animate-bump"
         >
           {count}
         </span>
@@ -32,9 +34,9 @@ export function CartButton({ className = '' }) {
   )
 }
 
-// Tono del header según el scroll (toda la página es noche):
-// "top"   transparente sobre el hero,
-// "night" barra noche con blur en cuanto hay scroll.
+// Tono del header según el scroll:
+// "top"   transparente sobre el hero / encabezado de página (fondos claros: texto ink),
+// "solid" barra blanca translúcida con hairline, sombra suave y blur en cuanto hay scroll.
 function useHeaderTone() {
   const [tone, setTone] = useState('top')
 
@@ -42,7 +44,7 @@ function useHeaderTone() {
     let frame = 0
     function measure() {
       frame = 0
-      setTone(window.scrollY < 12 ? 'top' : 'night')
+      setTone(window.scrollY < 12 ? 'top' : 'solid')
     }
     function schedule() {
       if (!frame) frame = requestAnimationFrame(measure)
@@ -58,17 +60,40 @@ function useHeaderTone() {
   return tone
 }
 
+// Blur solo desde tablet (en móvil cuesta demasiado): ahí el fondo es casi opaco
 const TONES = {
-  top: 'theme-night border-transparent bg-transparent',
-  night:
-    'theme-night border-night-line bg-night/90 shadow-[0_10px_30px_-14px_rgb(0_0_0/0.6)] backdrop-blur-xl backdrop-saturate-150 max-md:backdrop-blur-none max-md:backdrop-saturate-100 md:bg-night/75',
+  top: 'border-transparent bg-transparent',
+  solid:
+    'border-line bg-card/95 shadow-soft md:bg-card/90 md:backdrop-blur-xl md:backdrop-saturate-150',
+}
+
+// Clases del enlace de navegación según si es la ruta actual (NavLink pone aria-current="page").
+// Activo: texto ink + peso medio + barra brand fija debajo (styles.css: .nav-link.is-active).
+function navClass({ isActive }) {
+  return `nav-link flex min-h-11 items-center rounded-control px-3 text-[15px] transition-colors hover:text-ink ${
+    isActive ? 'is-active font-medium text-ink' : 'text-ink-soft'
+  }`
+}
+
+function mobileNavClass({ isActive }) {
+  return `mobile-nav-link flex min-h-12 items-center rounded-control px-3 text-[16px] ${
+    isActive ? 'is-active font-semibold' : 'text-ink hover:bg-raised active:bg-raised'
+  }`
 }
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname } = useLocation()
   const scrollTone = useHeaderTone()
   // Con el menú móvil abierto sobre el hero, la barra necesita fondo propio
-  const tone = menuOpen && scrollTone === 'top' ? 'night' : scrollTone
+  const tone = menuOpen && scrollTone === 'top' ? 'solid' : scrollTone
+
+  // Cambiar de ruta cierra el menú móvil (ajuste de estado durante el render, sin efecto)
+  const [prevPath, setPrevPath] = useState(pathname)
+  if (pathname !== prevPath) {
+    setPrevPath(pathname)
+    setMenuOpen(false)
+  }
   const menuButtonRef = useRef(null)
   const { isOpen: cartOpen } = useCart()
 
@@ -104,34 +129,32 @@ export default function Header() {
   }, [])
 
   return (
-    // -mb-16: el header (64 px) se superpone al hero oscuro, que reserva ese espacio arriba
+    // -mb-16: el header (64 px) se superpone al primer bloque de cada página (hero o
+    // encabezado de página), que reserva ese espacio arriba (pt ≥ 64 px)
     <header
       data-tone={tone}
       className={`sticky top-0 z-40 -mb-16 border-b transition-[background-color,border-color,box-shadow] duration-300 ${TONES[tone]}`}
     >
       <Container className="flex h-16 items-center justify-between gap-4">
-        <a href="#inicio" className="-ml-1 flex min-h-11 items-center rounded-control px-1" aria-label={`${site.name}, ir al inicio`}>
+        <Link to="/" className="-ml-1 flex min-h-11 items-center rounded-control px-1" aria-label={`${site.name}, ir al inicio`}>
           <Logo />
-        </a>
+        </Link>
 
         <nav aria-label="Principal" className="hidden md:block">
           <ul className="flex items-center gap-1">
-            {site.nav.map((item) => (
-              <li key={item.href}>
-                <a
-                  href={item.href}
-                  className="nav-link flex min-h-11 items-center rounded-control px-3 text-[15px] text-ink-soft transition-colors hover:text-ink"
-                >
+            {mainNav.map((item) => (
+              <li key={item.to}>
+                <NavLink to={item.to} end={item.end} className={navClass}>
                   {item.label}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>
         </nav>
 
         <div className="flex items-center gap-1">
-          <Button href="#contacto" variant="night-primary" className="max-md:hidden">
-            Agendar consulta
+          <Button to={bookPath} variant="primary" className="max-md:hidden" aria-current={pathname === bookPath ? 'page' : undefined}>
+            Agendar
           </Button>
           <CartButton className="md:ml-2" />
           <button
@@ -148,26 +171,26 @@ export default function Header() {
         </div>
       </Container>
 
-      {/* Panel superpuesto (absolute): abrir o cerrar el menú no cambia el alto del header,
-          así el scroll a la sección elegida no queda corrido */}
+      {/* Panel superpuesto (absolute): abrir o cerrar el menú no cambia el alto del header */}
       <nav
         id="menu-movil"
         aria-label="Principal móvil"
         hidden={!menuOpen}
-        className="theme-night absolute inset-x-0 top-full border-y border-night-line bg-night/95 shadow-[0_24px_40px_-24px_rgb(0_0_0/0.45)] md:hidden"
+        className="absolute inset-x-0 top-full border-y border-line bg-card shadow-float md:hidden"
       >
         <Container as="ul" className="flex flex-col py-2">
-          {site.nav.map((item) => (
-            <li key={item.href}>
-              <a
-                href={item.href}
-                onClick={() => setMenuOpen(false)}
-                className="flex min-h-12 items-center rounded-control px-2 text-[16px] text-ink transition-colors hover:bg-raised active:bg-raised"
-              >
+          {mainNav.map((item) => (
+            <li key={item.to}>
+              <NavLink to={item.to} end={item.end} onClick={() => setMenuOpen(false)} className={mobileNavClass}>
                 {item.label}
-              </a>
+              </NavLink>
             </li>
           ))}
+          <li>
+            <NavLink to={bookPath} onClick={() => setMenuOpen(false)} className={mobileNavClass}>
+              Agendar consulta
+            </NavLink>
+          </li>
         </Container>
       </nav>
     </header>

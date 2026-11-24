@@ -9,7 +9,7 @@ import '@fontsource/ibm-plex-mono/500.css'
 import App from './App.jsx'
 import './styles.css'
 import 'lenis/dist/lenis.css'
-// Utilidades de motion v2 (fondo noche, Lenis, vuelo al carrito); va después de styles.css
+// Utilidades de motion (fondos, Lenis, vuelo al carrito); va después de styles.css
 import './components/motion/motion.css'
 
 createRoot(document.getElementById('root')).render(

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MessageCircle, X } from 'lucide-react'
 import ProductPackage from './ProductPackage.jsx'
 import QuantityStepper from './QuantityStepper.jsx'
@@ -7,6 +8,7 @@ import Icon from '../ui/Icon.jsx'
 import { useCart } from '../../context/cart.js'
 import { formatPrice } from '../../lib/formatPrice.js'
 import { buildOrderMessage, buildWhatsAppUrl } from '../../lib/whatsapp.js'
+import { productPath } from '../../data/navigation.js'
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -21,7 +23,10 @@ export default function CartDrawer() {
   const [delivery, setDelivery] = useState('despacho')
   const panelRef = useRef(null)
   const closeRef = useRef(null)
-  // Si se cierra con "Ver productos", el foco va a la tienda y no al botón que abrió el carrito
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+  // Si se cierra con "Ver productos" estando ya en /tienda, el foco va al título de la página
+  // y no al botón que abrió el carrito (si se navega, el cambio de ruta mueve el foco)
   const focusShopOnClose = useRef(false)
 
   // Al abrir: foco en cerrar, bloqueo de scroll, Esc cierra y Tab queda dentro.
@@ -83,7 +88,11 @@ export default function CartDrawer() {
       body.style.paddingRight = prev.bodyPadding
       if (focusShopOnClose.current) {
         focusShopOnClose.current = false
-        document.getElementById('tienda-title')?.focus()
+        const heading = document.querySelector('#contenido h1')
+        if (heading) {
+          if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1')
+          heading.focus()
+        }
       } else if (previous instanceof HTMLElement && document.contains(previous)) {
         previous.focus()
       }
@@ -116,7 +125,7 @@ export default function CartDrawer() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-title"
-        className={`theme-light absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col bg-card shadow-float transition-transform duration-300 ${
+        className={`absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col bg-card shadow-float transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -150,14 +159,14 @@ export default function CartDrawer() {
               Agrega alimento, antiparasitarios o productos de higiene y envíanos el pedido por WhatsApp.
             </p>
             <Button
-              href="#tienda"
+              to="/tienda"
               variant="secondary"
               className="mt-6"
               onClick={(e) => {
-                // Sin salto de ancla: al cerrar, el foco va al título de la tienda y la página llega ahí
                 e.preventDefault()
-                focusShopOnClose.current = true
+                if (pathname === '/tienda') focusShopOnClose.current = true
                 closeCart()
+                if (pathname !== '/tienda') navigate('/tienda')
               }}
             >
               Ver productos
@@ -174,7 +183,15 @@ export default function CartDrawer() {
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-[15px] font-medium leading-5 text-ink">{product.name}</p>
+                        <p className="text-[15px] font-medium leading-5 text-ink">
+                          <Link
+                            to={productPath(product)}
+                            onClick={closeCart}
+                            className="rounded-[4px] underline-offset-4 hover:underline"
+                          >
+                            {product.name}
+                          </Link>
+                        </p>
                         <p className="mt-1 font-mono text-[12px] leading-4 text-muted">
                           {product.size} · {formatPrice(product.price)} c/u
                         </p>
@@ -204,8 +221,8 @@ export default function CartDrawer() {
                     return (
                       <label
                         key={opt.id}
-                        className={`flex min-h-11 cursor-pointer flex-col justify-center rounded-control border px-3 py-2 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-pine ${
-                          active ? 'border-pine bg-pine-soft' : 'border-line-strong hover:bg-raised'
+                        className={`flex min-h-11 cursor-pointer flex-col justify-center rounded-control border px-3 py-2 transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand ${
+                          active ? 'border-brand bg-leaf-soft' : 'border-line-strong hover:bg-raised'
                         }`}
                       >
                         <input
@@ -216,7 +233,7 @@ export default function CartDrawer() {
                           onChange={() => setDelivery(opt.id)}
                           className="sr-only"
                         />
-                        <span className={`text-[14px] leading-5 ${active ? 'font-medium text-pine' : 'text-ink'}`}>
+                        <span className={`text-[14px] leading-5 ${active ? 'font-medium text-brand-hover' : 'text-ink'}`}>
                           {opt.label}
                         </span>
                         <span className={`font-mono text-[12px] leading-4 ${active ? 'text-ink-soft' : 'text-muted'}`}>
